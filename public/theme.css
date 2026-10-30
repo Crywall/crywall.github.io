@@ -170,3 +170,15 @@ body::before { opacity: .025; }
 
 /* website version: no PC-only controls */
 .online #rangeSel, .online #openFolder, .online #liveBar { display: none !important; }
+
+/* never let decorations widen the page on phones */
+html, body { overflow-x: clip; }
+.main::before { right: 0; width: min(44rem, 100%); }
+@media (max-width: 720px) {
+  .nav__inner { justify-content: space-between; }
+  .brand__name { display: none; }
+  .tabs { max-width: none; flex: 1 1 auto; min-width: 0; }
+  .themes { margin-left: 6px; flex: none; }
+  .hero h1 { font-size: 40px; max-width: 100%; }
+  .search--hero .btn { padding: 12px 18px; }
+}

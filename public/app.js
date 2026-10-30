@@ -178,6 +178,11 @@
   const ONLINE = IS_REMOTE || new URLSearchParams(location.search).has('online');   // website (GitHub Pages): no PC server, catalog files instead
   const PHONE_MODE = IS_PHONE || ONLINE;
   document.documentElement.classList.toggle('online', ONLINE);
+  if (ONLINE) {
+    // the website can't change the computer's wallpaper: adjust the promises in the hero
+    const sub = $('.hero__sub'); if (sub) sub.innerHTML = 'İnternetin en beğenilen duvar kağıtları tek yerde. Beğen, indir, <b>bilgisayarına ya da telefonuna koy.</b>';
+    const st = $$('.hero__stats > div')[2]; if (st) st.innerHTML = '<b>Ücretsiz</b><span>Bilgisayar &amp; telefon</span>';
+  }
   const SAVE_LABEL = IS_PHONE ? 'Telefona kaydet' : 'İndir';
   document.documentElement.classList.toggle('phone-mode', PHONE_MODE);
   const videoUrl = (it) => {
