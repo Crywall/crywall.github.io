@@ -71,8 +71,8 @@ foreach ($cat in $Cats) {
 }
 
 # Live wallpapers (same list as LIVE_CATS in public/app.js)
-$Live = @('mb:anime-nature', 'mb:japan', 'mb:samurai', 'mb:fantasy', 'mb:dragon', 'mb:knight', 'mb:cyberpunk', 'mb:dark', 'mb:technology',
-    'mb:space', 'mb:astronaut', 'mb:black-hole', 'mb:rain', 'mb:night', 'mb:sunset', 'mb:forest', 'mb:winter', 'mb:mountain', 'mb:autumn-leaves', 'mb:water',
+$Live = @('mb:anime-nature', 'mb:japan', 'mb:samurai', 'mb:fantasy', 'mb:knight', 'mb:cyberpunk', 'mb:dark',
+    'mb:space', 'mb:rain', 'mb:night', 'mb:sunset', 'mb:forest', 'mb:winter', 'mb:mountain', 'mb:autumn-leaves', 'mb:water',
     'mb:car', 'mb:sports-cars', 'mb:animal', 'mb:cat', 'mx:nature', 'mx:galaxy', 'mx:sea', 'mx:forest', 'mx:city', 'mx:neon', 'mx:fire')
 $liveTotal = 0
 foreach ($lc in $Live) {

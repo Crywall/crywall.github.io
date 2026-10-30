@@ -24,9 +24,9 @@
   // [key, name, group]  key = "<source>:<category>"  (mb = MotionBGs, mx = Mixkit). Generic tags only.
   const LIVE_CATS = [
     ['mb:anime-nature', 'Anime Manzara', 'Çizim & Sanat'], ['mb:japan', 'Japonya', 'Çizim & Sanat'], ['mb:samurai', 'Samuray', 'Çizim & Sanat'],
-    ['mb:fantasy', 'Fantastik', 'Çizim & Sanat'], ['mb:dragon', 'Ejderha', 'Çizim & Sanat'], ['mb:knight', 'Şövalye', 'Çizim & Sanat'],
-    ['mb:cyberpunk', 'Siberpunk', 'Çizim & Sanat'], ['mb:dark', 'Karanlık', 'Çizim & Sanat'], ['mb:technology', 'Teknoloji', 'Çizim & Sanat'],
-    ['mb:space', 'Uzay', 'Uzay'], ['mb:astronaut', 'Astronot', 'Uzay'], ['mb:black-hole', 'Kara Delik', 'Uzay'],
+    ['mb:fantasy', 'Fantastik', 'Çizim & Sanat'], ['mb:knight', 'Şövalye', 'Çizim & Sanat'],
+    ['mb:cyberpunk', 'Siberpunk', 'Çizim & Sanat'], ['mb:dark', 'Karanlık', 'Çizim & Sanat'],
+    ['mb:space', 'Uzay', 'Uzay'],
     ['mb:rain', 'Yağmur', 'Atmosfer'], ['mb:night', 'Gece', 'Atmosfer'], ['mb:sunset', 'Gün batımı', 'Atmosfer'], ['mb:forest', 'Orman', 'Atmosfer'],
     ['mb:winter', 'Kış', 'Atmosfer'], ['mb:mountain', 'Dağ', 'Atmosfer'], ['mb:autumn-leaves', 'Sonbahar', 'Atmosfer'], ['mb:water', 'Su', 'Atmosfer'],
     ['mb:car', 'Arabalar', 'Araba & Hayvan'], ['mb:sports-cars', 'Spor Arabalar', 'Araba & Hayvan'], ['mb:animal', 'Hayvanlar', 'Araba & Hayvan'], ['mb:cat', 'Kediler', 'Araba & Hayvan'],
