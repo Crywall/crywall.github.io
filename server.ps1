@@ -224,7 +224,7 @@ if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
 $AllowedOrigins = @('https://crywall.github.io', "http://localhost:$Port", "http://127.0.0.1:$Port")
 
 $Mime = @{ '.html' = 'text/html; charset=utf-8'; '.css' = 'text/css; charset=utf-8'; '.js' = 'application/javascript; charset=utf-8'
-           '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.ico' = 'image/x-icon'; '.json' = 'application/json' }
+           '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.ico' = 'image/x-icon'; '.json' = 'application/json'; '.webmanifest' = 'application/manifest+json'; '.webp' = 'image/webp' }
 $WhAllowed = 'q', 'categories', 'sorting', 'order', 'topRange', 'atleast', 'ratios', 'colors', 'page', 'seed'
 
 while ($listener.IsListening) {

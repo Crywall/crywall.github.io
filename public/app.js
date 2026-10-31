@@ -173,7 +173,7 @@
   // ---------- phone mode ----------
   // On a phone (or when the site is opened from another device) we can't touch the
   // computer's wallpaper, so "Apply" becomes "Save to phone".
-  const IS_PHONE = matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820;
+  const IS_PHONE = (matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820) || new URLSearchParams(location.search).has('phone');
   const IS_REMOTE = !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
   // ONLINE = website without the PC helper (catalog files, "İndir").
   // When crywall.github.io is opened on a PC where the CryWall helper runs (server.ps1, started
@@ -514,11 +514,12 @@
     if (S.colors) all = all.filter((it) => it.colors.some((c) => c.toLowerCase() === '#' + S.colors.toLowerCase()));
     return sortList(all);
   }
-  async function staticMix(n = 6, landscapeOnly = false) {
+  // forHero: pictures that fill the hero — tall ones on phones, wide ones on computers
+  async function staticMix(n = 6, forHero = false) {
     const pick = shuffle(CATS.filter((c) => c.key !== 'kesfet')).slice(0, 4);
     const lists = await Promise.all(pick.map(getCat));
     const out = [];
-    lists.forEach((l) => shuffle(l.filter((it) => !mix.seen.has(it.id) && (landscapeOnly ? it.ratio >= 1.5 && it.w >= 1920 : passFilters(it)))).slice(0, n)
+    lists.forEach((l) => shuffle(l.filter((it) => !mix.seen.has(it.id) && (forHero ? (IS_PHONE ? it.ratio < 0.8 && it.h >= 1920 : it.ratio >= 1.5 && it.w >= 1920) : passFilters(it)))).slice(0, n)
       .forEach((it) => { mix.seen.add(it.id); out.push(it); }));
     return shuffle(out);
   }

@@ -188,3 +188,70 @@ html, body { overflow-x: clip; }
 .connect b { font-size: 14px; }
 .connect span { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .connect .btn { width: 100%; }
+
+/* slides that are off screen must not peek in at the edges (the slow zoom enlarges the picture) */
+.hslide { overflow: hidden; }
+
+/* viewer: always show the WHOLE picture (tall ones were cut off) */
+.vwrap { grid-template: 100% / 100%; }
+.vwrap > .main-img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+
+/* ---------- phones: wallpapers fit the screen ---------- */
+@media (max-width: 720px) {
+  .grid, .grid.is-portrait { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border-radius: 12px; }
+  .card__tags { left: 6px; top: 6px; right: 6px; gap: 3px; }
+  .tagcat { font-size: 10px; padding: 2px 6px; }
+  .card__overlay { padding: 8px; opacity: 1; background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.75)); }
+  .card__top .iconbtn { display: none; }
+  .card__stats { display: none; }
+  .card__bottom { justify-content: flex-end; }
+  .card__bottom .btn { padding: 6px 10px; font-size: 12px; }
+  .card__bottom .btn svg { width: 14px; height: 14px; }
+  .card__title { font-size: 12px; }
+  .cats__row { grid-auto-columns: 150px; gap: 10px; }
+  .cat { height: 96px; }
+  .viewer__panel { grid-template-rows: 64vh auto; height: 100vh; height: 100dvh; overflow-y: auto; }
+  .viewer__stage { min-height: 64vh; }
+  .viewer__nav { width: 40px; height: 40px; font-size: 22px; }
+  .viewer__side { overflow: visible; }
+}
+
+/* ---------- install as app (pwa.js) ---------- */
+.pwa-navbtn { order: 10; margin-left: 12px; gap: 6px; }
+.pwa-navbtn svg { width: 16px; height: 16px; fill: var(--accent); }
+.pwa-navbtn + .themes { margin-left: 8px; }
+@media (max-width: 1100px) { .pwa-navbtn { margin-left: auto; } .pwa-navbtn span { display: none; } }
+
+.pwa-banner { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 260; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 12px;
+  border-radius: 18px; background: rgba(11,15,21,.94); backdrop-filter: blur(16px); border: 1px solid rgb(var(--accent-rgb) / .35);
+  box-shadow: 0 20px 50px -20px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.03); transform: translateY(140%); transition: transform .6s var(--ease); }
+.pwa-banner.show { transform: none; }
+.pwa-banner img { width: 44px; height: 44px; border-radius: 12px; flex: none; }
+.pwa-banner div { flex: 1; min-width: 0; display: grid; }
+.pwa-banner b { font-size: 14px; }
+.pwa-banner span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pwa-banner .btn { flex: none; }
+.pwa-banner__x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: rgba(255,255,255,.06); color: var(--muted); font-size: 13px; padding: 0; }
+.phone-mode .totop { bottom: 92px; }
+
+.pwa-sheet { position: fixed; inset: 0; z-index: 450; display: grid; place-items: center; padding: 16px; }
+.pwa-sheet__bg { position: absolute; inset: 0; background: rgba(3,4,7,.82); backdrop-filter: blur(10px); animation: fade .25s; }
+.pwa-sheet__card { position: relative; width: min(420px, 100%); padding: 28px 24px 24px; border-radius: 22px; text-align: center;
+  background: linear-gradient(160deg, #0f141b, #090d12); border: 1px solid var(--line-2); box-shadow: 0 40px 120px -20px rgba(0,0,0,.9); animation: pop .35s var(--ease); }
+.pwa-sheet__x { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(255,255,255,.04); font-size: 14px; }
+.pwa-sheet__icon { width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 12px; }
+.pwa-sheet h3 { font-size: 21px; margin: 0 0 8px; }
+.pwa-sheet p { margin: 0 0 14px; color: #b9c6d6; font-size: 14px; line-height: 1.5; }
+.pwa-steps { text-align: left; margin: 6px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+.pwa-steps li { counter-increment: s; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid var(--line); font-size: 14px; }
+.pwa-steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #04161b; font-weight: 700; font-size: 13px; }
+.pwa-steps small { color: var(--muted); }
+.ios-share { width: 18px; height: 18px; fill: var(--accent); vertical-align: middle; }
+.pwa-qr { width: 230px; height: 230px; margin: 4px auto 12px; padding: 12px; border-radius: 16px; background: #fff; display: grid; place-items: center; }
+.pwa-qr svg { width: 100%; height: 100%; }
+.pwa-qr span { color: #333; font-size: 13px; }
+.pwa-link { font-size: 13px !important; color: var(--muted) !important; margin: 0 !important; }
+.pwa-link b { color: var(--accent); }
+.pwa-steps li { display: block; position: relative; padding-left: 46px; line-height: 1.5; }
+.pwa-steps li::before { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }

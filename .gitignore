@@ -4,3 +4,5 @@ public/data/
 GUNLUK.md
 # personal shortcut (contains local paths)
 *.lnk
+# temporary test pages
+public/_*.html
