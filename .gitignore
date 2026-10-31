@@ -2,3 +2,5 @@
 public/data/
 # personal notes
 GUNLUK.md
+# personal shortcut (contains local paths)
+*.lnk
