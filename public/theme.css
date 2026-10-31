@@ -279,3 +279,11 @@ html, body { overflow-x: clip; }
   .card:hover { transform: none; }
   .main::before { display: none; }
 }
+
+/* version badge next to the logo + "updated" note */
+.ver { align-self: center; font-size: 10.5px; font-weight: 600; letter-spacing: .02em; color: var(--muted); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,.03); font-family: Inter, sans-serif; }
+.ver-note { position: fixed; left: 50%; top: 70px; z-index: 460; transform: translate(-50%, -12px); opacity: 0; padding: 9px 16px; border-radius: 999px;
+  background: rgba(11,15,21,.95); border: 1px solid rgb(var(--accent-rgb) / .45); color: var(--text); font-size: 13.5px; font-weight: 600;
+  box-shadow: 0 14px 34px -14px rgb(var(--accent-rgb) / .6); transition: opacity .4s, transform .5s var(--ease); pointer-events: none; white-space: nowrap; }
+.ver-note.show { opacity: 1; transform: translate(-50%, 0); }
+@media (max-width: 720px) { .ver { font-size: 9.5px; padding: 1px 5px; } }

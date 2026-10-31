@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history: the version number is the commit count
       - name: Restore phone thumbnails made on earlier nights
         uses: actions/cache@v4
         with:
@@ -34,6 +36,10 @@ jobs:
       - name: Build wallpaper catalog
         shell: pwsh
         run: ./tools/build-catalog.ps1
+      - name: Write version (shown in the corner of the site)
+        run: |
+          echo "{\"v\":\"1.$(git rev-list --count HEAD)\",\"sha\":\"$(git rev-parse --short HEAD)\",\"date\":\"$(git log -1 --format=%cs)\"}" > public/version.json
+          cat public/version.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

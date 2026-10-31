@@ -117,3 +117,40 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
+
+// ---------- version in the corner + automatic update ----------
+// The site/app always loads the newest files from the internet; this just shows the version
+// (next to the logo) and, if a new version is published while the app is open, reloads it
+// the next time you come back to it.
+(() => {
+  'use strict';
+  let current = null;
+  const get = () => fetch('version.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  function note(text) {
+    const n = document.createElement('div');
+    n.className = 'ver-note'; n.textContent = text;
+    document.body.append(n);
+    setTimeout(() => n.classList.add('show'), 50);
+    setTimeout(() => { n.classList.remove('show'); setTimeout(() => n.remove(), 500); }, 4200);
+  }
+  async function init() {
+    const v = await get();
+    if (!v || !v.v) return;                       // PC version (no version file): nothing to show
+    current = v.v;
+    const brand = document.querySelector('.nav .brand');
+    if (brand && !brand.querySelector('.ver')) brand.insertAdjacentHTML('beforeend', `<span class="ver" title="Son güncelleme: ${v.date || ''}">v${v.v}</span>`);
+    let seen = null; try { seen = localStorage.getItem('crywall.ver'); localStorage.setItem('crywall.ver', v.v); } catch {}
+    if (seen && seen !== v.v) note(`CryWall güncellendi: v${v.v}`);
+  }
+  async function check() {
+    if (!current || document.hidden) return;
+    const v = await get();
+    if (!v || !v.v || v.v === current) return;
+    const viewerOpen = !document.getElementById('viewer')?.hidden;
+    if (viewerOpen) { current = v.v; note(`Yeni sürüm hazır (v${v.v}) — sayfayı kapatıp açınca gelecek`); return; }
+    location.reload();
+  }
+  document.addEventListener('visibilitychange', check);
+  setInterval(check, 15 * 60 * 1000);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
