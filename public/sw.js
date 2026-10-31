@@ -18,6 +18,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;   // other sites: browser handles it
   if (url.pathname.includes('/t/')) return;                               // big phone previews: normal browser cache
+  if (url.pathname.includes('/t/')) return;                               // big phone previews: normal browser cache
   e.respondWith(
     fetch(req, { cache: 'no-cache' }).then((res) => {   // always ask the server for the newest file
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
