@@ -89,11 +89,17 @@
   }
   // c = the CryWall category the picture came from (shown on the card)
   const toImg = (w, c) => ({
-    kind: 'img', id: w.id, thumb: w.thumbs.large, small: w.thumbs.small, full: w.path,
+    kind: 'img', id: w.id, thumb: w.thumbs.large, tall: w.thumbs.original, small: w.thumbs.small, full: w.path,
     w: w.dimension_x, h: w.dimension_y, res: w.resolution, ratio: w.ratio, size: w.file_size,
     views: w.views, favs: w.favorites, colors: w.colors || [], cat: w.category, page: w.url,
     catKey: c?.key || '', catName: c?.name || '',
   });
+
+  // Tall (phone) wallpapers: Wallhaven's "large" preview is a small landscape crop that looks
+  // pixelated in a tall box, so use our own 1080px preview (it.phone, made nightly) or the
+  // uncropped one. On phones the hero also uses the 1080px picture instead of the 4K original.
+  const thumbOf = (it) => (it.kind === 'img' && it.ratio < 1 && it.tall ? it.tall : it.thumb);
+  const heroSrc = (it) => (IS_PHONE && it.phone ? it.phone : it.full);
 
   // ---------- mood tags ----------
   // A picture's "vibe" is read from its colour palette (brightness, saturation, hue)
@@ -368,8 +374,10 @@
     else if (!sameNav(history.state, st)) history.pushState(st, '');
   }
   addEventListener('popstate', (e) => {
-    if (!viewer.hidden) closeViewer();
-    const st = e.state; if (!st) return;
+    // phone Back button / swipe: first closes an open wallpaper page
+    if (!viewer.hidden) { closeViewer(true); return; }
+    const st = e.state; if (!st || st.viewer) return;
+    if (sameNav(st, navState())) return;       // same view: nothing to reload
     restoring = true;
     S.cat = CATS.find((c) => c.key === st.cat) || CATS[0]; S.q = st.q || ''; S.colors = st.colors || '';
     S.title = st.title || S.cat.name; S.liveCat = st.live || S.liveCat;
@@ -453,7 +461,7 @@
   // every night (tools/build-catalog.ps1) and the browser filters them.
   const catCache = {}, liveCache = {};
   const fromCat = (o, c) => ({
-    kind: 'img', id: o.id, thumb: o.t, small: o.t, full: o.f, w: o.w, h: o.h, res: o.w + 'x' + o.h, ratio: o.r, size: o.s,
+    kind: 'img', id: o.id, thumb: o.t, tall: o.p || o.o || '', phone: o.p || '', small: o.t, full: o.f, w: o.w, h: o.h, res: o.w + 'x' + o.h, ratio: o.r, size: o.s,
     views: o.v, favs: o.fv, colors: o.c || [], date: o.d, page: o.u, cat: c.c === '010' ? 'anime' : 'general', catKey: c.key, catName: c.name,
   });
   async function getCat(c) {
@@ -570,7 +578,7 @@
     if (it.kind === 'img') {
       c.innerHTML = `
         <div class="card__ph" style="background:${esc(bg)}"></div>
-        <img src="${esc(it.thumb)}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy">
+        <img src="${esc(thumbOf(it))}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy">
         <div class="card__tags">
           ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}
           <div class="card__moods">${moodHtml(it)}</div>
@@ -639,6 +647,7 @@
     curIdx = idx; cur = curList[idx];
     if (!cur) return;
     const wasOpen = !viewer.hidden;
+    if (!wasOpen) history.pushState({ ...(history.state || navState()), viewer: true }, '');   // so the phone Back button closes it
     viewer.hidden = false; document.body.style.overflow = 'hidden';
     const m = $('#vMedia');
     const wrap = el('div', 'vwrap');
@@ -654,12 +663,12 @@
     m.append(wrap);
     if (cur.kind === 'img') {
       const it = cur;
-      const ph = el('img', 'ph'); ph.src = it.thumb; ph.alt = '';
-      const main = el('img', 'main-img is-blur'); main.src = it.thumb; main.alt = 'Önizleme';
+      const ph = el('img', 'ph'); ph.src = thumbOf(it); ph.alt = '';
+      const main = el('img', 'main-img is-blur'); main.src = thumbOf(it); main.alt = 'Önizleme';
       wrap.append(ph, main);
       // the sharp image fades in on top of the blurred one (no hard swap)
       const full = el('img', 'main-img full-in'); full.alt = 'Önizleme';
-      full.src = it.full;
+      full.src = heroSrc(it);          // phones: the 1080px picture is plenty for the screen (Kaydet still saves the original)
       full.decode().then(() => { if (wrap.isConnected) { wrap.append(full); setTimeout(() => main.remove(), 700); } }).catch(() => {});
     } else {
       const v = el('video', 'main-img'); v.src = cur.hd; v.poster = cur.thumb; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
@@ -772,9 +781,12 @@
     } catch {}
   }
 
-  function closeViewer() {
+  // fromHistory: closed by the Back button (history already moved back)
+  function closeViewer(fromHistory = false) {
+    if (viewer.hidden) return;
     viewer.hidden = true; document.body.style.overflow = '';
     $('#vMedia').innerHTML = ''; cur = null;
+    if (!fromHistory && history.state && history.state.viewer) { const s = { ...history.state }; delete s.viewer; history.replaceState(s, ''); }
   }
   const step = (d) => { const n = curIdx + d; if (n >= 0 && n < curList.length) openViewer(n, curList, d); };
   $('#vPrev').onclick = () => step(-1);
@@ -923,7 +935,7 @@
     function addSlides(list) {
       list.forEach((it) => {
         const s = el('div', 'hslide');
-        const ph = el('img', 'hslide__ph'); ph.src = it.thumb; ph.alt = '';
+        const ph = el('img', 'hslide__ph'); ph.src = thumbOf(it); ph.alt = '';
         s.append(ph);
         stage.append(s);
         slides.push(s);
@@ -943,7 +955,7 @@
       i = (i + items.length) % items.length;
       if (ready.has(i)) return ready.get(i);
       const img = el('img', 'hslide__img'); img.alt = '';
-      img.src = items[i].full;
+      img.src = heroSrc(items[i]);
       const p = img.decode().then(() => { slides[i].append(img); slides[i].classList.add('is-sharp'); })
         .catch(() => {});                       // keep the thumbnail if it fails
       ready.set(i, p);

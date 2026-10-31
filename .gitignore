@@ -6,3 +6,5 @@ GUNLUK.md
 *.lnk
 # temporary test pages
 public/_*.html
+# phone thumbnails, made nightly by GitHub Actions
+public/t/

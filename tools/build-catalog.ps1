@@ -47,6 +47,30 @@ function Get-Wallhaven($cat, [string]$ratios, [int]$page, [string]$range) {
     return $null
 }
 
+# Phone thumbnails: Wallhaven's own previews are small landscape crops, which look pixelated
+# in tall phone boxes. For tall (phone) wallpapers we make our own 1080px-wide preview with
+# ffmpeg -> public/t/<id>.jpg. Already-made ones are kept (GitHub Actions cache), so each
+# night only new wallpapers are downloaded. Skipped quietly when ffmpeg isn't installed.
+$ThumbDir = Join-Path (Split-Path $Out) 't'
+$Ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
+$MaxNewThumbs = 800
+$newThumbs = 0
+$keepThumbs = @{}
+New-Item -ItemType Directory -Force $ThumbDir | Out-Null
+function New-PhoneThumb([string]$id, [string]$url) {
+    $file = Join-Path $ThumbDir "$id.jpg"
+    if (Test-Path $file) { $keepThumbs["$id.jpg"] = 1; return $true }
+    if (-not $Ffmpeg -or $script:newThumbs -ge $MaxNewThumbs) { return $false }
+    $tmp = Join-Path ([IO.Path]::GetTempPath()) ("cw_" + $id + [IO.Path]::GetExtension($url))
+    try {
+        Invoke-WebRequest $url -Headers @{ 'User-Agent' = $UA } -UseBasicParsing -TimeoutSec 60 -OutFile $tmp
+        & $Ffmpeg.Source -loglevel error -y -i $tmp -vf 'scale=1080:-2' -q:v 5 $file 2>$null
+        if (Test-Path $file) { $script:newThumbs++; $keepThumbs["$id.jpg"] = 1; return $true }
+    } catch { Write-Host "  thumb $id failed: $($_.Exception.Message)" }
+    finally { Remove-Item $tmp -ErrorAction SilentlyContinue }
+    return $false
+}
+
 $total = 0
 foreach ($cat in $Cats) {
     $items = New-Object System.Collections.ArrayList
@@ -58,17 +82,22 @@ foreach ($cat in $Cats) {
         if (-not $r) { continue }
         foreach ($w in @($r.data)) {
             if (-not $w -or $seen[$w.id]) { continue }; $seen[$w.id] = 1
-            [void]$items.Add([ordered]@{
-                id = $w.id; t = $w.thumbs.large; f = $w.path; w = [int]$w.dimension_x; h = [int]$w.dimension_y
+            $item = [ordered]@{
+                id = $w.id; t = $w.thumbs.large; o = $w.thumbs.original; f = $w.path; w = [int]$w.dimension_x; h = [int]$w.dimension_y
                 r = [double]$w.ratio; s = [int]$w.file_size; v = [int]$w.views; fv = [int]$w.favorites
                 c = @($w.colors); d = ([string]$w.created_at).Substring(0, [Math]::Min(10, ([string]$w.created_at).Length)); u = $w.url
-            })
+            }
+            if ([double]$w.ratio -lt 1 -and (New-PhoneThumb $w.id $w.path)) { $item.p = "t/$($w.id).jpg" }
+            [void]$items.Add($item)
         }
     }
     Save-Json (Join-Path $Out (Join-Path 'c' "$($cat.key).json")) @($items)
     Write-Host ("{0,-10} {1} wallpapers" -f $cat.key, $items.Count)
     $total += $items.Count
 }
+# drop phone thumbnails of wallpapers that left the catalog (keeps the site small)
+Get-ChildItem $ThumbDir -Filter *.jpg -ErrorAction SilentlyContinue | Where-Object { -not $keepThumbs[$_.Name] } | Remove-Item -ErrorAction SilentlyContinue
+Write-Host "phone thumbnails: $($keepThumbs.Count) ($newThumbs new)$(if (-not $Ffmpeg) { ' — ffmpeg not found, skipped' })"
 
 # Live wallpapers (same list as LIVE_CATS in public/app.js)
 $Live = @('mb:anime-nature', 'mb:japan', 'mb:samurai', 'mb:fantasy', 'mb:knight', 'mb:cyberpunk', 'mb:dark',

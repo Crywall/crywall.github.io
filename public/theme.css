@@ -255,3 +255,27 @@ html, body { overflow-x: clip; }
 .pwa-link b { color: var(--accent); }
 .pwa-steps li { display: block; position: relative; padding-left: 46px; line-height: 1.5; }
 .pwa-steps li::before { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
+
+/* viewer close: "← Geri" on phones, ✕ on computers */
+.viewer__back { display: none; }
+@media (max-width: 1100px) {
+  .viewer__close { position: fixed; top: 12px; left: 12px; right: auto; z-index: 130; width: auto; height: 40px; padding: 0 14px;
+    border-radius: 999px; background: rgba(7,10,14,.72); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.18);
+    font-size: 14px; font-weight: 600; color: #fff; box-shadow: 0 8px 24px -8px rgba(0,0,0,.8); }
+  .viewer__back { display: inline; }
+  .viewer__x { display: none; }
+  .viewer__side h3 { padding-right: 0; }
+}
+
+/* ---------- phones: lighter effects = smoother scrolling ---------- */
+@media (max-width: 720px), (pointer: coarse) {
+  body::before { display: none; }                                  /* film grain layer */
+  .tagcat, .mood, .pill, .iconbtn, .search--hero, .hero__credit { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .tagcat, .mood { background: rgba(8,10,14,.78); }
+  .hslide.is-active .hslide__img, .hslide.leave-right .hslide__img, .hslide.leave-left .hslide__img { animation: heroImgIn 1s ease both; }
+  .hslide.is-active .hslide__ph, .hslide.leave-right .hslide__ph, .hslide.leave-left .hslide__ph { animation: none; }
+  .grad, .brand__name span { animation: none; }
+  .card { animation-duration: .35s; }
+  .card:hover { transform: none; }
+  .main::before { display: none; }
+}

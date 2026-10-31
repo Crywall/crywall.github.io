@@ -112,12 +112,18 @@
       r.x = r.dragX + dx;
     }));
     addEventListener('pointerup', () => { rows.forEach((r) => (r.drag = null)); setTimeout(() => (dragMoved = false), 0); });
-    requestAnimationFrame(frame);
+    // measure once (reading sizes every frame is slow on phones); re-measure on resize
+    const measure = () => rows.forEach((r) => (r.half = r.track.scrollWidth / 2));
+    measure(); addEventListener('resize', measure); setTimeout(measure, 1500);
+    // only animate while the strips are on screen
+    new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible && !running) { running = true; requestAnimationFrame(frame); } })
+      .observe($('#strip'));
   }
-  let dragMoved = false;
+  let dragMoved = false, visible = false, running = false;
   function frame() {
+    if (!visible) { running = false; return; }
     rows.forEach((r) => {
-      const half = r.track.scrollWidth / 2;
+      const half = r.half;
       if (r.drag == null) {
         r.x += r.base * r.dir * (r.hover ? 0.3 : 1);   // steady, slow drift — not tied to scrolling
       }
