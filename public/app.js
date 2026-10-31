@@ -175,16 +175,32 @@
   // computer's wallpaper, so "Apply" becomes "Save to phone".
   const IS_PHONE = matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820;
   const IS_REMOTE = !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-  const ONLINE = IS_REMOTE || new URLSearchParams(location.search).has('online');   // website (GitHub Pages): no PC server, catalog files instead
-  const PHONE_MODE = IS_PHONE || ONLINE;
-  document.documentElement.classList.toggle('online', ONLINE);
-  if (ONLINE) {
-    // the website can't change the computer's wallpaper: adjust the promises in the hero
-    const sub = $('.hero__sub'); if (sub) sub.innerHTML = 'İnternetin en beğenilen duvar kağıtları tek yerde. Beğen, indir, <b>bilgisayarına ya da telefonuna koy.</b>';
-    const st = $$('.hero__stats > div')[2]; if (st) st.innerHTML = '<b>Ücretsiz</b><span>Bilgisayar &amp; telefon</span>';
+  // ONLINE = website without the PC helper (catalog files, "İndir").
+  // When crywall.github.io is opened on a PC where the CryWall helper runs (server.ps1, started
+  // with Windows), detectHelper() switches back to full "Uygula" mode through http://localhost:8790.
+  let ONLINE = IS_REMOTE || new URLSearchParams(location.search).has('online');
+  let PHONE_MODE = IS_PHONE || ONLINE;
+  let API = '';                        // '' = same server; 'http://localhost:8790' = PC helper from the website
+  const HELPER_URL = 'http://localhost:8790';
+  async function detectHelper() {
+    if (!IS_REMOTE || IS_PHONE) return;
+    try {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1200);
+      const r = await fetch(HELPER_URL + '/api/status', { signal: ctl.signal });
+      if (!r.ok) return;
+      API = HELPER_URL; ONLINE = false; PHONE_MODE = false;
+    } catch { /* helper not running: stay in download mode */ }
+  }
+  function applyModeUI() {
+    document.documentElement.classList.toggle('online', ONLINE);
+    document.documentElement.classList.toggle('phone-mode', PHONE_MODE);
+    if (ONLINE) {
+      // the website can't change the computer's wallpaper: adjust the promises in the hero
+      const sub = $('.hero__sub'); if (sub) sub.innerHTML = 'İnternetin en beğenilen duvar kağıtları tek yerde. Beğen, indir, <b>bilgisayarına ya da telefonuna koy.</b>';
+      const st = $$('.hero__stats > div')[2]; if (st) st.innerHTML = '<b>Ücretsiz</b><span>Bilgisayar &amp; telefon</span>';
+    }
   }
   const SAVE_LABEL = IS_PHONE ? 'Telefona kaydet' : 'İndir';
-  document.documentElement.classList.toggle('phone-mode', PHONE_MODE);
   const videoUrl = (it) => {
     const [src, n] = String(it.id).split('-');
     return src === 'mb' ? `https://motionbgs.com/dl/hd/${n}/` : `https://assets.mixkit.co/videos/${n}/${n}-1080.mp4`;
@@ -196,7 +212,7 @@
       toast(IS_PHONE ? 'Görsel açıldı' : 'Görsel yeni sekmede açıldı', IS_PHONE ? 'Görsele basılı tut › "Fotoğraflara kaydet" / "Resmi indir".' : 'Sağ tıkla › "Resmi farklı kaydet". Sonra resme sağ tıkla › "Masaüstü arka planı olarak ayarla".', 'ok', 7000);
       return;
     }
-    const url = '/api/img?u=' + encodeURIComponent(it.full);
+    const url = API + '/api/img?u=' + encodeURIComponent(it.full);
     const t = toast('Hazırlanıyor…', it.res, 'wait', 0);
     try {
       const blob = await fetch(url).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); });
@@ -249,7 +265,7 @@
     const mon = multi() ? S.mon : 'all';
     const t = toast('Uygulanıyor…', `${it.res} indiriliyor`, 'wait', 0);
     try {
-      const r = await api('/api/apply', { url: it.full, target, monitor: mon });
+      const r = await api(API + '/api/apply', { url: it.full, target, monitor: mon });
       const where = target !== 'lock' && multi() ? ` (${monName(mon)})` : '';
       if (r.lock === 'fail') {
         t.set(target === 'both' ? 'Masaüstü uygulandı, kilit ekranı uygulanamadı' : 'Kilit ekranı uygulanamadı',
@@ -264,21 +280,21 @@
   }
   async function saveImg(it) {
     const t = toast('Kaydediliyor…', '', 'wait', 0);
-    try { await api('/api/save', { url: it.full }); t.set('İndirildi', 'Resimler › CryWall klasörüne kaydedildi.', 'ok'); }
+    try { await api(API + '/api/save', { url: it.full }); t.set('İndirildi', 'Resimler › CryWall klasörüne kaydedildi.', 'ok'); }
     catch (e) { t.set('İndirilemedi', serverHint(e), 'err', 6000); }
   }
   async function applyLive(it) {
     const mon = multi() && S.mon !== 'span' ? S.mon : 'all';
     const t = toast('Hareketli duvar kağıdı hazırlanıyor…', 'Video ilk seferde indiriliyor, birkaç saniye sürebilir.', 'wait', 0);
     try {
-      await api('/api/live/apply', { id: it.id, title: it.title, monitor: mon });
+      await api(API + '/api/live/apply', { id: it.id, title: it.title, monitor: mon });
       t.set('Hareketli duvar kağıdı açıldı' + (multi() ? ` (${monName(mon)})` : ''), 'Masaüstüne geçince görebilirsin.', 'ok', 5000);
       await status();
     } catch (e) { t.set('Açılamadı', serverHint(e), 'err', 6000); }
   }
   async function stopLive(monitor = 'all') {
     try {
-      await api('/api/live/stop?monitor=' + encodeURIComponent(monitor));
+      await api(API + '/api/live/stop?monitor=' + encodeURIComponent(monitor));
       toast('Hareketli duvar kağıdı kapatıldı', monitor === 'all' ? '' : monName(monitor), 'ok', 2500);
       await status();
     } catch (e) { toast('Durdurulamadı', serverHint(e), 'err'); }
@@ -379,7 +395,7 @@
         if (S.ratio) p.set('ratios', S.ratio);
         if (S.colors) p.set('colors', S.colors);
         if (S.seed) p.set('seed', S.seed);
-        const r = await fetch('/api/search?' + p).then((x) => x.json());
+        const r = await fetch(API + '/api/search?' + p).then((x) => x.json());
         if (token !== S.token) return;
         if (!r.data) throw new Error(r.error || 'Arama başarısız');
         if (r.blocked) { S.done = true; showEmpty('', true); return; }
@@ -388,7 +404,7 @@
         if (S.page === 1) $('#gridCount').textContent = nf.format(r.meta.total) + ' duvar kağıdı';
         if (S.page >= S.last) S.done = true;
       } else {
-        const r = await api(`/api/live/list?cat=${encodeURIComponent(S.liveCat)}&page=${S.page}`);
+        const r = await api(API + `/api/live/list?cat=${encodeURIComponent(S.liveCat)}&page=${S.page}`);
         if (token !== S.token) return;
         const lc = LIVE_CATS.find((c) => c[0] === S.liveCat);
         list = (r.data || []).map((v) => ({ kind: 'live', ...v, cat: S.liveCat, catName: lc ? lc[1].replace(/^\W+\s*/, '') : '' }));
@@ -497,7 +513,7 @@
       info.used.push(page);
       const p = new URLSearchParams({ q: c.q, categories: c.c, sorting: S.sort === 'date_added' ? 'date_added' : 'toplist', topRange: S.range || '1y', atleast: S.res, page });
       if (S.ratio) p.set('ratios', S.ratio);
-      return fetch('/api/search?' + p).then((x) => x.json()).then((r) => {
+      return fetch(API + '/api/search?' + p).then((x) => x.json()).then((r) => {
         if (r.meta) info.last = r.meta.last_page;
         return { c, data: r.data || [] };
       }).catch(() => ({ c, data: [] }));
@@ -709,7 +725,7 @@
   async function loadTags(it) {
     if (ONLINE) return;
     try {
-      const r = await fetch('/api/w/' + it.id).then((x) => x.json());
+      const r = await fetch(API + '/api/w/' + it.id).then((x) => x.json());
       if (cur !== it || !r.data) return;
       const box = $('#vTags');
       (r.data.tags || []).slice(0, 14).forEach((t) => {
@@ -792,7 +808,7 @@
   $('#contactMail').href = CONTACT_EMAIL ? 'mailto:' + CONTACT_EMAIL : 'https://github.com/Crywall/crywall.github.io/issues/new?title=Kald%C4%B1rma%20talebi';
   $('#contactMail').target = '_blank';
   if (!CONTACT_EMAIL) $('#contactMail').textContent = 'GitHub üzerinden kaldırma talebi açarak bize';
-  $('#openFolder').onclick = () => api('/api/open-folder').catch((e) => toast('Klasör açılamadı', serverHint(e), 'err'));
+  $('#openFolder').onclick = () => api(API + '/api/open-folder').catch((e) => toast('Klasör açılamadı', serverHint(e), 'err'));
 
   // ---------- micro-interactions ----------
   // click ripple on buttons
@@ -847,7 +863,7 @@
       const page = free[Math.floor(Math.random() * free.length)];
       info.used.push(page);
       const p = new URLSearchParams({ q: c.q, categories: c.c, sorting: 'toplist', topRange: '1y', atleast: '1920x1080', ratios: '16x9,16x10', page });
-      return fetch('/api/search?' + p).then((x) => x.json())
+      return fetch(API + '/api/search?' + p).then((x) => x.json())
         .then((r) => { if (r.meta) info.last = r.meta.last_page; return { c, data: r.data || [] }; })
         .catch(() => ({ c, data: [] }));
     }));
@@ -992,7 +1008,7 @@
   async function status() {
     if (ONLINE) return;
     try {
-      const s = await api('/api/status');
+      const s = await api(API + '/api/status');
       S.lives = s.lives || []; S.monitors = s.monitors || [];
       const valid = ['all', 'span', ...S.monitors.map((m) => String(m.index))];
       if (!valid.includes(S.mon)) S.mon = 'all';
@@ -1012,9 +1028,13 @@
   };
 
   // ---------- go ----------
-  renderCats();
-  switchMode('static', false);
-  reset();
-  hero();
-  status();
+  (async () => {
+    await detectHelper();      // on the website: is the CryWall PC helper running here?
+    applyModeUI();
+    renderCats();
+    switchMode('static', false);
+    reset();
+    hero();
+    status();
+  })();
 })();

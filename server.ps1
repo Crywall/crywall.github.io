@@ -1,6 +1,9 @@
 # CryWall - local server
 # Serves the website and applies wallpapers (desktop / lock screen / live video) on this PC.
 # Start with Baslat.bat. Close this window to stop the server.
+# -NoBrowser: run silently in the background (used by the Windows startup shortcut) so that
+#  https://crywall.github.io can apply wallpapers on this PC.
+param([switch]$NoBrowser)
 
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -207,14 +210,18 @@ $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$Port/")
 try { $listener.Start() } catch {
     Write-Host "CryWall zaten calisiyor olabilir. Tarayici aciliyor..."
-    Start-Process "http://localhost:$Port/"
+    if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
     exit
 }
 Write-Host ""
 Write-Host "  CRYWALL calisiyor:  http://localhost:$Port/" -ForegroundColor Cyan
 Write-Host "  Kapatmak icin bu pencereyi kapatin." -ForegroundColor DarkGray
 Write-Host ""
-Start-Process "http://localhost:$Port/"
+if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
+
+# Web pages allowed to talk to this PC helper. Any other website is refused, so a random
+# site can't change your wallpaper.
+$AllowedOrigins = @('https://crywall.github.io', "http://localhost:$Port", "http://127.0.0.1:$Port")
 
 $Mime = @{ '.html' = 'text/html; charset=utf-8'; '.css' = 'text/css; charset=utf-8'; '.js' = 'application/javascript; charset=utf-8'
            '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.ico' = 'image/x-icon'; '.json' = 'application/json' }
@@ -224,6 +231,25 @@ while ($listener.IsListening) {
     $ctx = $listener.GetContext()
     $req = $ctx.Request
     $path = $req.Url.AbsolutePath
+    # Cross-site check: browsers always send Origin on cross-site requests.
+    $origin = $req.Headers['Origin']
+    if ($origin -and $origin -notin $AllowedOrigins) {
+        try { Send-Json $ctx @{ ok = $false; error = 'origin_not_allowed' } 403 } catch {}
+        continue
+    }
+    if ($origin) {
+        $ctx.Response.Headers['Access-Control-Allow-Origin'] = $origin
+        $ctx.Response.Headers['Vary'] = 'Origin'
+    }
+    if ($req.HttpMethod -eq 'OPTIONS') {
+        # CORS / private-network preflight from https://crywall.github.io
+        $ctx.Response.Headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        $ctx.Response.Headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        $ctx.Response.Headers['Access-Control-Allow-Private-Network'] = 'true'
+        $ctx.Response.Headers['Access-Control-Max-Age'] = '600'
+        try { $ctx.Response.StatusCode = 204; $ctx.Response.Close() } catch {}
+        continue
+    }
     # Changing THIS computer (apply / live / folder) is only allowed from this computer itself.
     $pcOnly = '/api/apply', '/api/save', '/api/open-folder', '/api/live/apply', '/api/live/stop'
     if ($path -in $pcOnly -and -not $req.IsLocal) {
