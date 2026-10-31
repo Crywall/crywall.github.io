@@ -182,14 +182,39 @@
   let PHONE_MODE = IS_PHONE || ONLINE;
   let API = '';                        // '' = same server; 'http://localhost:8790' = PC helper from the website
   const HELPER_URL = 'http://localhost:8790';
-  async function detectHelper() {
-    if (!IS_REMOTE || IS_PHONE) return;
+  // Browsers (Edge/Chrome "local network access") ask the user before a website may talk to
+  // localhost. We never trigger that question on page load — only when the user presses
+  // "Bu bilgisayara bağlan". Once allowed, the browser remembers it and we connect silently.
+  async function lnaState() {
+    for (const name of ['local-network-access', 'loopback-network']) {
+      try { return (await navigator.permissions.query({ name })).state; } catch {}
+    }
+    return 'unsupported';            // older browser: no permission needed
+  }
+  async function detectHelper(interactive = false) {
+    if (!IS_REMOTE || IS_PHONE) return false;
+    const state = await lnaState();
+    if (!interactive && state !== 'granted' && state !== 'unsupported') return false;
     try {
-      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1200);
-      const r = await fetch(HELPER_URL + '/api/status', { signal: ctl.signal });
-      if (!r.ok) return;
+      const ctl = new AbortController();
+      if (!interactive) setTimeout(() => ctl.abort(), 1500);      // interactive: wait for the user's answer
+      const r = await fetch(HELPER_URL + '/api/status', { signal: ctl.signal, targetAddressSpace: 'loopback' });
+      if (!r.ok) return false;
       API = HELPER_URL; ONLINE = false; PHONE_MODE = false;
-    } catch { /* helper not running: stay in download mode */ }
+      return true;
+    } catch { return false; }       // helper not running / permission denied: stay in download mode
+  }
+  async function connectHelper() {
+    const t = toast('Bilgisayara bağlanılıyor…', 'Tarayıcı izin sorarsa "İzin ver"e bas.', 'wait', 0);
+    if (await detectHelper(true)) {
+      t.set('Bağlandı', 'Artık duvar kağıtlarını tek tıkla uygulayabilirsin.', 'ok', 2500);
+      setTimeout(() => location.reload(), 900);
+    } else {
+      const st = await lnaState();
+      t.set('Bağlanılamadı', st === 'denied'
+        ? 'Tarayıcı izni kapalı: adres çubuğundaki kilit simgesi › Site izinleri › "Yerel ağ" / "Diğer uygulamalar" › İzin ver.'
+        : 'CryWall yardımcısı bu bilgisayarda çalışmıyor. Belgeler › CryWall › Baslat.bat ile başlat.', 'err', 9000);
+    }
   }
   function applyModeUI() {
     document.documentElement.classList.toggle('online', ONLINE);
@@ -682,10 +707,20 @@
         <a class="btn btn--primary" href="${esc(videoUrl(it))}" target="_blank" rel="noopener">${ICON.down}Videoyu indir</a>
         <div class="row">${fav}</div>
         <p class="note">Hareketli duvar kağıdı için: <b>Android</b>'de "Video Live Wallpaper" gibi bir uygulamayla bu videoyu seçebilirsin. <b>iPhone</b> video duvar kağıdını desteklemiyor; "Canlı Fotoğraf"a çeviren bir uygulama gerekir.</p>`;
+      if (!IS_PHONE && IS_REMOTE) {
+        // desktop visitor on the website: offer the one-click Apply via the PC helper
+        a.insertAdjacentHTML('afterbegin', `
+          <div class="connect">
+            <b>Tek tıkla masaüstüne uygula</b>
+            <span>CryWall yardımcısı bu bilgisayarda çalışıyorsa bağlan; duvar kağıdı doğrudan uygulanır.</span>
+            <button class="btn btn--primary" data-act="connect">${ICON.monitor}Bu bilgisayara bağlan</button>
+          </div>`);
+      }
       a.onclick = (e) => {
         const b = e.target.closest('[data-act]'); if (!b) return;
         if (b.dataset.act === 'fav') { toggleFav(it); renderActions(it); }
         else if (b.dataset.act === 'phone') savePhone(it);
+        else if (b.dataset.act === 'connect') connectHelper();
       };
       return;
     }
