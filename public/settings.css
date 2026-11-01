@@ -188,3 +188,12 @@ body { font-feature-settings: "cv11", "ss01"; }
 /* strips: nothing grows on hover, so pills never overlap */
 .mqi, .mq:hover .mqi { transform: none !important; }
 .mq .mqi:hover { transform: translateY(-3px) !important; }
+
+/* outline words in the strip: the soft font draws letters from overlapping pieces, so a bare
+   outline showed the joins. Fill with the strip colour and paint the stroke underneath —
+   only the clean outer outline stays visible. */
+.mqt { color: #090d12; -webkit-text-fill-color: #090d12; -webkit-text-stroke: 2px rgba(233,239,246,.32); paint-order: stroke fill; }
+.mqt:hover { color: var(--accent); -webkit-text-fill-color: var(--accent); -webkit-text-stroke-color: var(--accent); }
+[data-mode="light"] .mqt { color: #eef2f7; -webkit-text-fill-color: #eef2f7; -webkit-text-stroke: 2px rgba(15,23,36,.4); }
+[data-mode="light"] .mqt:hover { -webkit-text-fill-color: var(--accent); -webkit-text-stroke-color: var(--accent); }
+.mqt small { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
