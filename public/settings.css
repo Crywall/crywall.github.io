@@ -146,3 +146,8 @@ body { font-feature-settings: "cv11", "ss01"; }
 @media (max-width: 1100px) { [data-mode="light"] .viewer__close { color: #fff; } }
 [data-mode="light"] .mon b, [data-mode="light"] .mon small { color: var(--text); }
 [data-mode="light"] .empty { color: var(--muted); }
+
+/* hero second line: same soft font, thin + accent colour (no serif italic) */
+.hero2__title em { font-family: 'Plus Jakarta Sans', Inter, sans-serif !important; font-style: normal; font-weight: 300; font-size: 1em;
+  letter-spacing: -.035em; color: rgb(var(--accent-rgb)); -webkit-text-fill-color: currentColor; }
+.hero2__title em::after { height: .055em; bottom: -.04em; opacity: .7; }
