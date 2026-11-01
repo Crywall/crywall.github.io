@@ -202,6 +202,10 @@
   // When vexwalls.github.io is opened on a PC where the VexWalls helper runs (server.ps1, started
   // with Windows), detectHelper() switches back to full "Uygula" mode through http://localhost:8790.
   let ONLINE = IS_REMOTE || new URLSearchParams(location.search).has('online');
+  // CATALOG: on the website, lists always come from the nightly catalog (instant, no Wallhaven
+  // rate limit) — even when the PC helper is connected; the helper is then only used to APPLY
+  // wallpapers and for tag searches.
+  const CATALOG = ONLINE;
   let PHONE_MODE = IS_PHONE || ONLINE;
   let API = '';                        // '' = same server; 'http://localhost:8790' = PC helper from the website
   const HELPER_URL = 'http://localhost:8790';
@@ -267,6 +271,7 @@
   async function savePhone(it) {
     if (ONLINE) {
       // website: open the original picture (long-press / right-click to save it)
+      addRecent(it);
       window.open(it.full, '_blank', 'noopener');
       toast(IS_PHONE ? 'Görsel açıldı' : 'Görsel yeni sekmede açıldı', IS_PHONE ? 'Görsele basılı tut › "Fotoğraflara kaydet" / "Resmi indir".' : 'Sağ tıkla › "Resmi farklı kaydet". Sonra resme sağ tıkla › "Masaüstü arka planı olarak ayarla".', 'ok', 7000);
       return;
@@ -283,7 +288,7 @@
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = file.name; document.body.append(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-        t.set('İndirildi', 'Galeri / Fotoğraflar\'dan duvar kağıdı olarak ayarlayabilirsin.', 'ok', 5000);
+        addRecent(it); t.set('İndirildi', 'Galeri / Fotoğraflar\'dan duvar kağıdı olarak ayarlayabilirsin.', 'ok', 5000);
       }
     } catch (e) { t.set('Kaydedilemedi', e.message, 'err'); }
   }
@@ -330,7 +335,7 @@
         t.set(target === 'both' ? 'Masaüstü uygulandı, kilit ekranı uygulanamadı' : 'Kilit ekranı uygulanamadı',
           'Ayarlar › Kişiselleştirme › Kilit ekranı: "Resim" seçili olmalı.', 'err', 7000);
       } else {
-        t.set(`${TARGET_TXT[target]} uygulandı${where}`, 'Resimler › VexWalls klasörüne de kaydedildi.', 'ok');
+        addRecent(it); t.set(`${TARGET_TXT[target]} uygulandı${where}`, 'Resimler › VexWalls klasörüne de kaydedildi.', 'ok');
       }
       if (target !== 'lock') status();
     } catch (e) {
@@ -339,7 +344,7 @@
   }
   async function saveImg(it) {
     const t = toast('Kaydediliyor…', '', 'wait', 0);
-    try { await api(API + '/api/save', { url: it.full }); t.set('İndirildi', 'Resimler › VexWalls klasörüne kaydedildi.', 'ok'); }
+    try { await api(API + '/api/save', { url: it.full }); addRecent(it); t.set('İndirildi', 'Resimler › VexWalls klasörüne kaydedildi.', 'ok'); }
     catch (e) { t.set('İndirilemedi', serverHint(e), 'err', 6000); }
   }
   async function applyLive(it) {
@@ -347,6 +352,7 @@
     const t = toast('Hareketli duvar kağıdı hazırlanıyor…', 'Video ilk seferde indiriliyor, birkaç saniye sürebilir.', 'wait', 0);
     try {
       await api(API + '/api/live/apply', { id: it.id, title: it.title, monitor: mon });
+      addRecent(it);
       t.set('Hareketli duvar kağıdı açıldı' + (multi() ? ` (${monName(mon)})` : ''), 'Masaüstüne geçince görebilirsin.', 'ok', 5000);
       await status();
     } catch (e) { t.set('Açılamadı', serverHint(e), 'err', 6000); }
@@ -358,7 +364,9 @@
       await status();
     } catch (e) { toast('Durdurulamadı', serverHint(e), 'err'); }
   }
-  const serverHint = (e) => (/Failed to fetch|NetworkError/i.test(e.message) ? 'VexWalls sunucusu kapalı. Baslat.bat ile tekrar aç.' : e.message);
+  const serverHint = (e) => (/Failed to fetch|NetworkError/i.test(e.message) ? 'VexWalls sunucusu kapalı. Baslat.bat ile tekrar aç.'
+    : /busy|429|Too Many/i.test(e.message) ? 'Şu an çok yoğun, birkaç saniye sonra tekrar dene.'
+    : /Exception|DownloadString|HTTP 5/i.test(e.message) ? 'Duvar kağıtlarına şu an ulaşılamıyor, birazdan tekrar dene.' : e.message);
 
   function renderLiveBar() {
     const L = S.lives;
@@ -422,18 +430,19 @@
     grid.classList.toggle('is-portrait', S.mode === 'static' && S.ratio === 'portrait');
     if (S.mode === 'live') $('#gridTitle').textContent = 'Hareketli · ' + (LIVE_CATS.find((c) => c[0] === S.liveCat) || ['', ''])[1];
     else if (S.mode === 'fav') $('#gridTitle').textContent = 'Favorilerim';
+    else if (S.mode === 'recent') $('#gridTitle').textContent = 'Son kullanılanlar';
     else $('#gridTitle').textContent = S.title;
     if (scroll) { const top = $('.browse').getBoundingClientRect().top + scrollY - 70; if (scrollY > top || scroll === 'force') (window.cwScrollTo ? window.cwScrollTo(top) : scrollTo(0, top)); }
-    if (S.mode === 'fav') renderFavs(); else load();
+    if (S.mode === 'fav') renderFavs(); else if (S.mode === 'recent') renderRecent(); else load();
   }
 
   async function load() {
-    if (S.loading || S.done || S.mode === 'fav') return;
+    if (S.loading || S.done || S.mode === 'fav' || S.mode === 'recent') return;
     S.loading = true; $('#loader').classList.add('is-on');
     const token = S.token;
     try {
       let list = [];
-      if (ONLINE && S.mode === 'static' && !(S.cat.key === 'kesfet' && !S.q && !S.colors)) {
+      if (CATALOG && S.mode === 'static' && !(S.cat.key === 'kesfet' && !S.q && !S.colors) && !(API && S.title.startsWith('#'))) {
         // website version: filter the nightly catalog in the browser
         const all = await catalogQuery();
         if (token !== S.token) return;
@@ -441,7 +450,7 @@
         if (S.page === 1) $('#gridCount').textContent = nf.format(all.length) + ' duvar kağıdı';
         list = all.slice((S.page - 1) * 24, S.page * 24);
         if (S.page * 24 >= all.length) S.done = true;
-      } else if (ONLINE && S.mode === 'live') {
+      } else if (CATALOG && S.mode === 'live') {
         const all = await liveCatalog(S.liveCat);
         if (token !== S.token) return;
         const lc = LIVE_CATS.find((c) => c[0] === S.liveCat);
@@ -575,7 +584,7 @@
   // so the page looks different every visit.
   const mix = { pages: {}, seen: new Set() };
   async function loadMix() {
-    if (ONLINE) { if (S.page === 1) mix.seen = new Set(); const out = await staticMix(); if (!out.length) S.done = true; return out; }
+    if (CATALOG) { if (S.page === 1) mix.seen = new Set(); const out = await staticMix(); if (!out.length) S.done = true; return out; }
     if (S.page === 1) { mix.pages = {}; mix.seen = new Set(); }
     const pool = shuffle(mixPool()).slice(0, 4);
     const res = await Promise.all(pool.map((c) => {
@@ -604,6 +613,7 @@
     e.hidden = false;
     e.innerHTML = blocked ? '<b>Bu içerik VexWalls\'da yok</b>Telif hakkı nedeniyle oyun, film, dizi ve anime karakterlerine ait duvar kağıtlarını yayınlamıyoruz. Doğa, uzay, şehir veya sanat aramayı dene.'
       : msg ? `<b>Bir sorun oluştu</b>${esc(msg)}`
+      : S.mode === 'recent' ? '<b>Henüz bir şey kullanmadın</b>Uyguladığın, indirdiğin ya da hareketli olarak açtığın duvar kağıtları burada görünür.'
       : S.mode === 'fav' ? '<b>Henüz favorin yok</b>Beğendiğin duvar kağıtlarındaki ♥ işaretine bas, burada toplansın.' + (window.CryWallAccount && !window.CryWallAccount.user ? '<br><br><button class="btn btn--primary btn--sm" onclick="CryWallAccount.open(\'signup\')">Giriş yap · favorilerin kaybolmasın</button>' : '')
       : '<b>Sonuç bulunamadı</b>Farklı bir kelime veya daha düşük çözünürlük dene.';
   }
@@ -661,6 +671,21 @@
     return c;
   }
 
+  // recently used (applied / downloaded / set live), newest first, kept on this device
+  let recent = store.get('crywall.recent', []);
+  function addRecent(it) {
+    if (!it) return;
+    recent = [it, ...recent.filter((f) => favKey(f) !== favKey(it))].slice(0, 40);
+    store.set('crywall.recent', recent);
+  }
+  function renderRecent() {
+    grid.innerHTML = '';
+    S.items = recent.slice();
+    $('#gridCount').textContent = S.items.length ? S.items.length + ' duvar kağıdı' : '';
+    $('#empty').hidden = true;
+    S.items.forEach((it, i) => grid.append(card(it, i, i)));
+    if (!S.items.length) showEmpty();
+  }
   function renderFavs() {
     grid.innerHTML = '';
     S.items = favs.slice();
@@ -675,7 +700,7 @@
   // over — otherwise the page never ends and nobody can reach the footer.
   const AUTO_PAGES = 3;
   const autoOK = () => S.page <= AUTO_PAGES;
-  function updateMore() { const b = $('#moreBtn'); if (b) b.hidden = autoOK() || S.done || S.mode === 'fav' || S.loading; }
+  function updateMore() { const b = $('#moreBtn'); if (b) b.hidden = autoOK() || S.done || S.mode === 'fav' || S.mode === 'recent' || S.loading; }
   const io = new IntersectionObserver((en) => { if (en[0].isIntersecting && autoOK()) load(); updateMore(); }, { rootMargin: '900px' });
   io.observe($('#sentinel'));
   function checkSentinel() { const r = $('#sentinel').getBoundingClientRect(); if (r.top < innerHeight + 900 && autoOK()) load(); updateMore(); }
@@ -966,7 +991,7 @@
   // More pictures are fetched as the user swipes towards the end (Instagram-style).
   const heroFeed = { pages: {}, seen: new Set() };
   async function heroBatch() {
-    if (ONLINE) return staticMix(5, true);
+    if (CATALOG) return staticMix(5, true);
     const cats = shuffle(mixPool()).slice(0, 4);
     const res = await Promise.all(cats.map((c) => {
       const info = heroFeed.pages[c.key] || (heroFeed.pages[c.key] = { used: [], last: 8 });

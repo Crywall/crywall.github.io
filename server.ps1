@@ -80,9 +80,23 @@ $Cache = @{}
 function Get-Cached([string]$url, [int]$seconds = 600) {
     $now = Get-Date
     if ($Cache.ContainsKey($url) -and ($now - $Cache[$url].t).TotalSeconds -lt $seconds) { return $Cache[$url].v }
-    $v = (New-Client).DownloadString($url)
-    $Cache[$url] = @{ t = $now; v = $v }
-    return $v
+    # Wallhaven allows ~45 requests/minute: on "429 Too Many Requests" wait and retry,
+    # and if it still fails, serve the older cached answer when there is one.
+    for ($try = 1; $try -le 3; $try++) {
+        try {
+            $v = (New-Client).DownloadString($url)
+            $Cache[$url] = @{ t = $now; v = $v }
+            return $v
+        } catch {
+            $busy = $_.Exception.Message -match '429'
+            if (-not $busy -or $try -eq 3) {
+                if ($Cache.ContainsKey($url)) { return $Cache[$url].v }
+                if ($busy) { throw 'busy' }
+                throw
+            }
+            Start-Sleep -Seconds (2 * $try)
+        }
+    }
 }
 
 function Send($ctx, [int]$code, [string]$type, [byte[]]$bytes) {
