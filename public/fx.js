@@ -73,13 +73,16 @@
   $$('[data-count]').forEach((el) => cio.observe(el));
 
   // ---------- magnetic primary buttons ----------
+  // (cheap: remembers the one button being pulled instead of searching the page on every move)
+  let magBtn = null;
   document.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
     const b = e.target.closest('.btn--primary');
-    $$('.btn--primary.is-mag').forEach((x) => { if (x !== b) { x.classList.remove('is-mag'); x.style.transform = ''; } });
-    if (!b || e.pointerType !== 'mouse') return;
+    if (magBtn && magBtn !== b) { magBtn.style.transform = ''; magBtn = null; }
+    if (!b) return;
+    magBtn = b;
     const r = b.getBoundingClientRect();
-    b.classList.add('is-mag');
-    b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.16}px, ${(e.clientY - r.top - r.height / 2) * 0.28}px)`;
+    b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.12}px, ${(e.clientY - r.top - r.height / 2) * 0.2}px)`;
   }, { passive: true });
 
   // ---------- flowing category strips ----------

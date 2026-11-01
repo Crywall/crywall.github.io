@@ -367,3 +367,46 @@ body::before { display: none; }                         /* film grain layer */
 .nav__inner { gap: 18px; }
 .search--nav { width: auto; flex: 0 1 300px; min-width: 140px; }
 @media (max-width: 1280px) { .pwa-navbtn span { display: none; } }
+
+/* =========================================================
+   PERFORMANCE PASS (user: site slow, clicks lag, scroll drops frames)
+   Same look, far less work for the browser.
+   ========================================================= */
+/* 1) no "frosted glass": blurring what's behind an element is redone every frame */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.nav.is-solid { background: rgba(7,10,14,.96); }
+.viewer__backdrop { background: rgba(3,4,7,.93); animation-duration: .12s; }
+.search--hero { background: rgba(7,10,14,.85); }
+.tagcat, .mood, .pill { background: rgba(8,10,14,.8); }
+.toast, .themes__menu, .acc-menu, .livebar, .totop, .pwa-banner, .cookie { background: rgba(11,15,21,.98); }
+.hero__arrow, .viewer__nav, .viewer__preview, .iconbtn { background: rgba(0,0,0,.6); }
+.acc-dlg__bg, .pwa-sheet__bg, .legal::backdrop { background: rgba(3,4,7,.9); }
+
+/* 2) no endless animations (they repaint the screen non-stop) */
+.grad, .brand__name span, .tab .dot, .livebar__pulse, .brand .logo-spark { animation: none !important; }
+.brand .logo-shine { animation: none; }
+.brand:hover .logo-shine { animation: logoShine 1.2s var(--ease) 1; }
+
+/* 3) the wallpaper window opens instantly: no tilt/zoom-in, no blur filters */
+.viewer__panel { animation: viewerIn .16s ease-out both; }
+@keyframes viewerIn { from { opacity: 0; transform: translateY(8px); } }
+.viewer__media .ph { filter: brightness(.3); transform: none; }
+.viewer__media .is-blur { filter: none; }
+.vwrap > .full-in { animation: fullInFast .25s ease both; }
+@keyframes fullInFast { from { opacity: 0; } }
+.vwrap.in-right, .vwrap.in-left { animation-duration: .32s; }
+.vwrap.out-left, .vwrap.out-right { animation-duration: .25s; }
+
+/* 4) cards: off-screen ones are skipped by the browser; quicker, lighter effects */
+.card { content-visibility: auto; contain-intrinsic-size: auto 260px; animation: rise .28s ease-out backwards; animation-delay: 0s !important;
+  transition: transform .2s ease, border-color .2s; box-shadow: none; }
+.card:hover { box-shadow: none; }
+.card img { transition: transform .35s ease, opacity .3s; }
+.card__overlay { transition: opacity .15s; }
+.cat { contain: paint; }
+.cat img { transition: transform .35s ease; }
+
+/* 5) snappier buttons */
+.btn, .tab, .seg button, .chip, .iconbtn, .mqi { transition-duration: .15s !important; }
+.ind { transition-duration: .3s; }
+.ripple { animation-duration: .45s; }

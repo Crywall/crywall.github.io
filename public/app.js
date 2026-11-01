@@ -612,7 +612,7 @@
     if (it.kind === 'img') {
       c.innerHTML = `
         <div class="card__ph" style="background:${esc(bg)}"></div>
-        <img src="${esc(thumbOf(it))}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy">
+        <img src="${esc(thumbOf(it))}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy" decoding="async">
         <div class="card__tags">
           ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}
           <div class="card__moods">${moodHtml(it)}</div>
@@ -627,7 +627,7 @@
     } else {
       c.innerHTML = `
         <div class="card__ph" style="background:#111"></div>
-        <img src="${esc(it.thumb)}" alt="${esc(it.title)}" loading="lazy">
+        <img src="${esc(it.thumb)}" alt="${esc(it.title)}" loading="lazy" decoding="async">
         <video muted loop playsinline preload="none"></video>
         <div class="card__tags">
           <span class="tagcat tagcat--live">● CANLI</span>${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.uhd ? '<span class="tagcat tagcat--4k">4K</span>' : ''}
@@ -1025,10 +1025,14 @@
     const next = () => go(idx + 1, 1);
     const prev = () => go(idx - 1, -1);
     // autoplay: wait for the interval AND for the next image to be ready
+    // pause the slideshow while it's scrolled away or a wallpaper is open (it's a big 4K layer)
+    let heroOnScreen = true;
+    new IntersectionObserver((es) => { heroOnScreen = es[0].isIntersecting; if (heroOnScreen) restart(); }, { threshold: 0.15 }).observe(heroEl);
     function autoNext() {
+      if (!heroOnScreen || !$('#viewer').hidden) return;          // resumes when visible again
       const want = (idx + 1) % items.length;
       Promise.race([loadFull(want), new Promise((r) => setTimeout(r, 8000))])
-        .then(() => { if (!peek && !document.hidden && idx !== want) go(want, 1, false); });
+        .then(() => { if (!peek && !document.hidden && heroOnScreen && $('#viewer').hidden && idx !== want) go(want, 1, false); else restart(); });
     }
     function restart() {
       clearTimeout(timer);

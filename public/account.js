@@ -119,7 +119,6 @@ function toggleMenu() {
   menu.innerHTML = `
     <div class="acc-menu__head"><b>${esc(name)}</b><span>${esc(user.email || '')}</span>
       ${user.emailVerified || user.providerData.some((p) => p.providerId === 'google.com') ? '' : '<em>E-postanı doğrulamayı unutma</em>'}</div>
-    <div class="acc-menu__sync">${ICON_LOCK}<span>Favorilerin hesabında güvende, her cihazda aynı.</span></div>
     <button data-a="favs">♥ Favorilerim</button>
     <button data-a="out">Çıkış yap</button>
     <button data-a="del" class="danger">Hesabımı sil</button>`;
