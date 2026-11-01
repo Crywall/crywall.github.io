@@ -61,20 +61,25 @@ function Get-Wallhaven($cat, [string]$ratios, [int]$page, [string]$range) {
 # night only new wallpapers are downloaded. Skipped quietly when ffmpeg isn't installed.
 $ThumbDir = Join-Path (Split-Path $Out) 't'
 $Ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
-$MaxNewThumbs = 800
+$MaxNewThumbs = 1600
 $newThumbs = 0
 $keepThumbs = @{}
 New-Item -ItemType Directory -Force $ThumbDir | Out-Null
-function New-PhoneThumb([string]$id, [string]$url) {
-    $file = Join-Path $ThumbDir "$id.jpg"
-    if (Test-Path $file) { $keepThumbs["$id.jpg"] = 1; return $true }
+function New-PhoneThumb([string]$id, [string]$url) { return (New-Thumb $id $url '' 'scale=1080:-2' 5) }
+# Desktop: 1920px version for the home slideshow and the wallpaper window. Originals can be
+# 6000px+ and 5-10 MB: slow, and browsers sometimes give up decoding them (stays blurry).
+function New-DesktopThumb([string]$id, [string]$url) { return (New-Thumb $id $url '-d' "scale='min(1920,iw)':-2" 6) }
+function New-Thumb([string]$id, [string]$url, [string]$suffix, [string]$vf, [int]$q) {
+    $name = "$id$suffix.jpg"
+    $file = Join-Path $ThumbDir $name
+    if (Test-Path $file) { $keepThumbs[$name] = 1; return $true }
     if (-not $Ffmpeg -or $script:newThumbs -ge $MaxNewThumbs) { return $false }
     $tmp = Join-Path ([IO.Path]::GetTempPath()) ("cw_" + $id + [IO.Path]::GetExtension($url))
     try {
         Invoke-WebRequest $url -Headers @{ 'User-Agent' = $UA } -UseBasicParsing -TimeoutSec 60 -OutFile $tmp
-        & $Ffmpeg.Source -loglevel error -y -i $tmp -vf 'scale=1080:-2' -q:v 5 $file 2>$null
-        if (Test-Path $file) { $script:newThumbs++; $keepThumbs["$id.jpg"] = 1; return $true }
-    } catch { Write-Host "  thumb $id failed: $($_.Exception.Message)" }
+        & $Ffmpeg.Source -loglevel error -y -i $tmp -vf $vf -q:v $q $file 2>$null
+        if (Test-Path $file) { $script:newThumbs++; $keepThumbs[$name] = 1; return $true }
+    } catch { Write-Host "  thumb $name failed: $($_.Exception.Message)" }
     finally { Remove-Item $tmp -ErrorAction SilentlyContinue }
     return $false
 }
@@ -96,6 +101,7 @@ foreach ($cat in $Cats) {
                 c = @($w.colors); d = ([string]$w.created_at).Substring(0, [Math]::Min(10, ([string]$w.created_at).Length)); u = $w.url
             }
             if ([double]$w.ratio -lt 1 -and (New-PhoneThumb $w.id $w.path)) { $item.p = "t/$($w.id).jpg" }
+            if ([double]$w.ratio -ge 1.2 -and (New-DesktopThumb $w.id $w.path)) { $item.dp = "t/$($w.id)-d.jpg" }
             [void]$items.Add($item)
         }
     }

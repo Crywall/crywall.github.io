@@ -115,7 +115,8 @@
   // pixelated in a tall box, so use our own 1080px preview (it.phone, made nightly) or the
   // uncropped one. On phones the hero also uses the 1080px picture instead of the 4K original.
   const thumbOf = (it) => (it.kind === 'img' && it.ratio < 1 && it.tall ? it.tall : it.thumb);
-  const heroSrc = (it) => (IS_PHONE && it.phone ? it.phone : it.full);
+  // screen-sized copies made nightly (1080 tall for phones, 1920 wide for computers); originals as fallback
+  const heroSrc = (it) => (IS_PHONE ? (it.phone || it.full) : (it.desk || it.full));
 
   // ---------- mood tags ----------
   // A picture's "vibe" is read from its colour palette (brightness, saturation, hue)
@@ -492,7 +493,7 @@
   // every night (tools/build-catalog.ps1) and the browser filters them.
   const catCache = {}, liveCache = {};
   const fromCat = (o, c) => ({
-    kind: 'img', id: o.id, thumb: o.t, tall: o.p || o.o || '', phone: o.p || '', small: o.t, full: o.f, w: o.w, h: o.h, res: o.w + 'x' + o.h, ratio: o.r, size: o.s,
+    kind: 'img', id: o.id, thumb: o.t, tall: o.p || o.o || '', phone: o.p || '', desk: o.dp || '', small: o.t, full: o.f, w: o.w, h: o.h, res: o.w + 'x' + o.h, ratio: o.r, size: o.s,
     views: o.v, favs: o.fv, colors: o.c || [], date: o.d, page: o.u, cat: c.c === '010' ? 'anime' : 'general', catKey: c.key, catName: c.name,
   });
   async function getCat(c) {
@@ -712,7 +713,12 @@
       // the sharp image fades in on top of the blurred one (no hard swap)
       const full = el('img', 'main-img full-in'); full.alt = 'Önizleme';
       full.src = heroSrc(it);          // phones: the 1080px picture is plenty for the screen (Kaydet still saves the original)
-      full.decode().then(() => { if (wrap.isConnected) { wrap.append(full); setTimeout(() => main.remove(), 700); } }).catch(() => {});
+      const put = () => { if (wrap.isConnected && !full.isConnected) { wrap.append(full); setTimeout(() => main.remove(), 700); } };
+      full.decode().then(put).catch(() => {            // huge images: decode() may fail although they display
+        if (full.complete && full.naturalWidth) return put();
+        full.onload = put;
+        full.onerror = () => { if (full.src !== it.full) full.src = it.full; };
+      });
     } else {
       const v = el('video', 'main-img'); v.src = cur.hd; v.poster = cur.thumb; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
       v.onerror = () => { if (v.src !== cur.preview) v.src = cur.preview; };
@@ -1014,11 +1020,14 @@
       if (ready.has(i)) return ready.get(i);
       const img = el('img', 'hslide__img'); img.alt = '';
       img.src = heroSrc(items[i]);
-      const p = img.decode().then(() => {
-        slides[i].append(img); slides[i].classList.add('is-sharp');
-        if (i === idx) { try { localStorage.setItem('crywall.heroLast', items[i].full); } catch {} }   // shown instantly next visit
-      })
-        .catch(() => {});                       // keep the thumbnail if it fails
+      const show = () => { if (!img.isConnected) { slides[i].append(img); slides[i].classList.add('is-sharp'); } };
+      // decode() can fail on huge images even though they display fine: fall back to onload,
+      // and if the screen-sized copy is missing, use the original — never stay blurry.
+      const p = img.decode().then(show).catch(() => new Promise((res) => {
+        if (img.complete && img.naturalWidth) { show(); return res(); }
+        img.onload = () => { show(); res(); };
+        img.onerror = () => { if (img.src !== items[i].full) img.src = items[i].full; else res(); };
+      }));
       ready.set(i, p);
       return p;
     }
@@ -1043,7 +1052,7 @@
       void cur.offsetWidth;                   // restart the transition
       cur.classList.add('is-active');
       idx = n;
-      try { localStorage.setItem('crywall.heroLast', items[n].full); } catch {}   // shown instantly on the next visit
+      try { localStorage.setItem('crywall.heroLast', heroSrc(items[n])); } catch {}   // shown instantly on the next visit
       loadFull(n); loadFull(n + 1);
       $$('.hthumb', thumbs).forEach((t, i) => t.classList.toggle('is-active', i === n));
       $('.hthumb.is-active', thumbs)?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
