@@ -420,7 +420,7 @@
     if (S.mode === 'live') $('#gridTitle').textContent = 'Hareketli · ' + (LIVE_CATS.find((c) => c[0] === S.liveCat) || ['', ''])[1];
     else if (S.mode === 'fav') $('#gridTitle').textContent = 'Favorilerim';
     else $('#gridTitle').textContent = S.title;
-    if (scroll) { const top = $('.browse').getBoundingClientRect().top + scrollY - 70; if (scrollY > top || scroll === 'force') scrollTo({ top, behavior: 'smooth' }); }
+    if (scroll) { const top = $('.browse').getBoundingClientRect().top + scrollY - 70; if (scrollY > top || scroll === 'force') (window.cwScrollTo ? window.cwScrollTo(top) : scrollTo(0, top)); }
     if (S.mode === 'fav') renderFavs(); else load();
   }
 
@@ -862,7 +862,7 @@
     if (doReset) reset('force');
   }
   $$('.tab').forEach((t) => (t.onclick = () => switchMode(t.dataset.mode)));
-  $('[data-home]').onclick = (e) => { e.preventDefault(); S.cat = CATS[0]; S.q = ''; S.colors = ''; S.title = 'Keşfet'; switchMode('static', false); renderCats(); reset(); scrollTo({ top: 0, behavior: 'smooth' }); };
+  $('[data-home]').onclick = (e) => { e.preventDefault(); S.cat = CATS[0]; S.q = ''; S.colors = ''; S.title = 'Keşfet'; switchMode('static', false); renderCats(); reset(); (window.cwScrollTo ? window.cwScrollTo(0) : scrollTo(0, 0)); };
 
   $$('#sortSeg button').forEach((b) => (b.onclick = () => {
     S.sort = b.dataset.sort;

@@ -41,7 +41,7 @@
       ${user ? '' : `<button class="btn btn--primary st-wide" data-act="login">${T('Giriş yap')} / ${T('Kayıt ol')}</button>`}
 
       <h4>${T('Görünüm')}</h4>
-      <div class="st-row"><span>${T('Tema')}</span>${seg('mode', prefs.mode, [['dark', 'Koyu'], ['light', 'Açık'], ['system', 'Sistem']])}</div>
+      <div class="st-row"><span>${T('Tema')}</span>${seg('mode', prefs.mode === 'light' ? 'light' : 'dark', [['dark', 'Koyu'], ['light', 'Açık']])}</div>
       <div class="st-row st-row--col"><span>${T('Vurgu rengi')}</span>
         <div class="st-colors">${(th?.THEMES || []).map(([k, n, c]) => `<button data-accent="${k}" title="${T(n)}" class="${th.current() === k ? 'is-on' : ''}" style="--c:${c}"></button>`).join('')}</div></div>
       <div class="st-row"><span>${T('Dil')}</span>${seg('lang', prefs.lang, [['tr', 'Türkçe'], ['en', 'English']])}</div>

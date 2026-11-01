@@ -135,7 +135,7 @@
     rows.forEach((r) => {
       const half = r.half;
       if (r.drag == null) {
-        if (!r.hover) r.x += r.base * r.dir;   // slow steady drift; stops while the mouse is on the strip
+        r.x += r.base * r.dir;   // slow steady drift keeps going (also under the mouse); the wheel adds to it
         if (r.pend) { const s = r.pend * 0.14; r.x += s; r.pend -= s; if (Math.abs(r.pend) < 0.3) r.pend = 0; }   // soft wheel glide
       }
       if (half) { while (r.x <= -half) r.x += half; while (r.x > 0) r.x -= half; }
@@ -152,7 +152,7 @@
   if (!b) return;
   const upd = () => b.classList.toggle('show', scrollY > 500);
   addEventListener('scroll', upd, { passive: true }); upd();
-  b.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+  b.addEventListener('click', () => window.cwScrollTo(0));
 })();
 
 // ---------- privacy note (shown once) + privacy dialog ----------
@@ -184,3 +184,23 @@
     if (d && d.wallpapers && el) el.textContent = new Intl.NumberFormat('tr-TR').format(Math.floor(d.wallpapers / 100) * 100) + '+';
   }).catch(() => {});
 })();
+
+// ---------- smooth scrolling that always animates ----------
+// (The browser's own smooth scroll turns into a jump when Windows animations are off.)
+window.cwScrollTo = (top, ms) => {
+  const from = scrollY, dist = top - from;
+  if (Math.abs(dist) < 2) return;
+  const dur = ms || Math.min(1100, 380 + Math.abs(dist) * 0.25);
+  const t0 = performance.now();
+  const ease = (t) => 1 - Math.pow(1 - t, 4);          // fast start, soft landing
+  let stop = false;
+  const cancel = () => (stop = true);
+  addEventListener('wheel', cancel, { once: true, passive: true });
+  addEventListener('touchstart', cancel, { once: true, passive: true });
+  (function step(now) {
+    if (stop) return;
+    const p = Math.min(1, (now - t0) / dur);
+    window.scrollTo(0, from + dist * ease(p));
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+};

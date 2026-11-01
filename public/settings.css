@@ -93,3 +93,56 @@
 
 /* 4K badge stays light on every theme */
 .tagcat--4k { background: #f4f2ee !important; color: #0b0b0d !important; }
+
+/* manual smooth scrolling is done in JS (fx.js) */
+html { scroll-behavior: auto !important; }
+
+/* =========================================================
+   Softer type everywhere (user: the font was tiring)
+   ========================================================= */
+h1, h2, h3, h4, .brand__name, .mqi span, .mqt, .cat span, .secno, .hero__stats b, .acc-initial, .st-avatar, .mon b, .empty b, #intro .intro-name {
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif !important;
+}
+h2, h3 { font-weight: 600; letter-spacing: -.015em; }
+.brand__name { font-weight: 700; letter-spacing: -.02em; }
+.mqi span { font-weight: 600; letter-spacing: -.01em; }
+.mqt { font-weight: 600; letter-spacing: -.02em; -webkit-text-stroke-width: 1px; }
+.eyebrow, .strip__title, .st-body h4 { letter-spacing: .14em; }
+body { font-feature-settings: "cv11", "ss01"; }
+
+/* =========================================================
+   Hero text on the RIGHT, softer headline
+   ========================================================= */
+.hero2 { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.hero2__title { font-family: 'Plus Jakarta Sans', Inter, sans-serif !important; font-weight: 500; font-size: clamp(36px, 4.6vw, 70px); line-height: 1.04; letter-spacing: -.03em; }
+.hero2__title em { font-size: 1.08em; }
+.hero2__title em::after { left: auto; right: .08em; width: 92%; transform-origin: right; }
+.hero2__sub { margin-left: auto; font-weight: 400; color: #d3dbe5; }
+.hero2 .search--hero { width: 100%; }
+.hero2__quick { justify-content: flex-end; }
+.hero2__now { right: auto; left: 28px; }
+.hero__shade { background:
+  linear-gradient(180deg, rgba(7,8,12,.55) 0%, rgba(7,8,12,.05) 30%, rgba(7,8,12,.35) 60%, var(--bg) 100%),
+  radial-gradient(80% 60% at 85% 80%, rgba(7,8,12,.72), transparent 70%) !important; }
+[data-mode="light"] .hero__shade { background:
+  linear-gradient(180deg, rgba(7,8,12,.5) 0%, rgba(7,8,12,.05) 30%, rgba(7,8,12,.35) 62%, rgba(7,8,12,.6) 88%, var(--bg) 100%),
+  radial-gradient(80% 60% at 85% 82%, rgba(7,8,12,.7), transparent 70%) !important; }
+@media (max-width: 720px) {
+  .hero2 { align-items: flex-start; text-align: left; }
+  .hero2__title em::after { left: .05em; right: auto; transform-origin: left; }
+  .hero2__quick { justify-content: flex-start; }
+  .hero2__sub { margin-left: 0; }
+}
+
+[data-mode="light"] .mqt { -webkit-text-stroke-color: rgba(15,23,36,.45); }
+[data-mode="light"] .mqt small { color: #6b7686; }
+
+/* light theme: keep text readable wherever it sits on a picture or dark layer */
+[data-mode="light"] .cat span, [data-mode="light"] .card__title, [data-mode="light"] .card__stats { color: #fff; }
+[data-mode="light"] .brand__name span { background-image: linear-gradient(90deg, var(--accent), var(--accent2)); }
+[data-mode="light"] .nav:not(.is-solid) .brand__name span { background-image: linear-gradient(90deg, var(--accent), #ffffff); }
+[data-mode="light"] .moods .mood { color: var(--text); background: #f4f6fa; border-color: var(--line-2); }
+[data-mode="light"] .viewer__preview, [data-mode="light"] .viewer__nav, [data-mode="light"] .hero__arrow { color: #fff; }
+@media (max-width: 1100px) { [data-mode="light"] .viewer__close { color: #fff; } }
+[data-mode="light"] .mon b, [data-mode="light"] .mon small { color: var(--text); }
+[data-mode="light"] .empty { color: var(--muted); }

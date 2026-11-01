@@ -95,7 +95,7 @@ function navButton() {
     b = document.createElement('button');
     b.id = 'accBtn';
     b.className = 'acc-btn';
-    b.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); user ? toggleMenu() : openDialog('login'); });   // settings only for signed-in users
     themes.after(b);
   }
   if (user) {
