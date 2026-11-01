@@ -34,7 +34,7 @@
     const name = user ? (user.displayName || (user.email || '').split('@')[0]) : '';
     panel.querySelector('.st-body').innerHTML = `
       <section class="st-acc">
-        ${user ? `<div class="st-avatar">${user.photoURL ? `<img src="${user.photoURL}" alt="" referrerpolicy="no-referrer">` : (name[0] || '?').toUpperCase()}</div>
+        ${user ? `<div class="st-avatar">${user.photoURL ? `<img src="${user.photoURL}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : (name[0] || '?').toUpperCase()}</div>
           <div class="st-acc__txt"><b>${name}</b><span>${user.email || ''}</span></div>`
         : `<div class="st-avatar st-avatar--guest">?</div><div class="st-acc__txt"><b>${T('Giriş yapmadın')}</b><span>${T('Giriş yaparsan favorilerin her cihazda seninle olur.')}</span></div>`}
       </section>
@@ -115,5 +115,6 @@
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel) close(); });
 
-  window.CWSettings = { open, close, prefs };
+  function setMode(m) { prefs.mode = m === 'light' ? 'light' : 'dark'; save(); applyMode(); }
+  window.CWSettings = { open, close, prefs, setMode };
 })();

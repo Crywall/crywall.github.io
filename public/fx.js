@@ -21,12 +21,18 @@
   function renderMenu() {
     if (!menu) return;
     const cur = root.dataset.theme || '';
-    menu.innerHTML = THEMES.map(([k, n, c]) => `<button data-t="${k}" class="${k === cur ? 'is-active' : ''}"><i style="background:${c};box-shadow:0 0 10px ${c}"></i>${n}</button>`).join('');
+    const light = root.dataset.mode === 'light';
+    menu.innerHTML = `<div class="themes__modes"><button data-setmode="dark" class="${light ? '' : 'is-active'}">☾ Koyu</button><button data-setmode="light" class="${light ? 'is-active' : ''}">☀ Açık</button></div>`
+      + THEMES.map(([k, n, c]) => `<button data-t="${k}" class="${k === cur ? 'is-active' : ''}"><i style="background:${c};box-shadow:0 0 10px ${c}"></i>${n}</button>`).join('');
   }
   applyTheme(store.get('crywall.theme', ''));
   window.CWTheme = { THEMES, apply: applyTheme, current: () => root.dataset.theme || '' };   // used by settings.js
-  $('#themeBtn')?.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; });
-  menu?.addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) { applyTheme(b.dataset.t); menu.hidden = true; } });
+  $('#themeBtn')?.addEventListener('click', (e) => { e.stopPropagation(); renderMenu(); menu.hidden = !menu.hidden; });
+  menu?.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-setmode]');
+    if (m) { window.CWSettings?.setMode(m.dataset.setmode); renderMenu(); return; }      // light / dark, menu stays open
+    const b = e.target.closest('[data-t]'); if (b) { applyTheme(b.dataset.t); menu.hidden = true; }
+  });
   document.addEventListener('click', (e) => { if (menu && !menu.hidden && !e.target.closest('.themes')) menu.hidden = true; });
 
   // ---------- scroll progress ----------

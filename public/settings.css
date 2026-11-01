@@ -157,3 +157,12 @@ body { font-feature-settings: "cv11", "ss01"; }
 .mq:hover .mqi:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 26px -14px rgb(var(--accent-rgb) / .8); }
 .mq--text .mqt:hover { transform: translateY(-2px); }
 .mqi:hover img { transform: none; }
+
+/* theme button is back in the menu bar: light/dark + accent colours */
+.themes { display: block !important; }
+.themes__modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.themes__modes button { justify-content: center; font-weight: 600; }
+[data-mode="light"] .themes__menu { background: #fff; border-color: var(--line-2); }
+[data-mode="light"] .themes__menu button { color: var(--muted); }
+[data-mode="light"] .themes__menu button.is-active { color: var(--text); background: rgba(15,23,36,.06); }
+[data-mode="light"] .nav:not(.is-solid) .themes__menu button { color: #556072; }

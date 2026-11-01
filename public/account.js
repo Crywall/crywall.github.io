@@ -101,7 +101,7 @@ function navButton() {
   if (user) {
     const name = user.displayName || (user.email || '').split('@')[0];
     b.innerHTML = user.photoURL
-      ? `<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
+      ? `<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'acc-initial',textContent:'${esc((name[0] || '?').toUpperCase())}'}))">`
       : `<span class="acc-initial">${esc((name[0] || '?').toUpperCase())}</span>`;
     b.title = name;
     b.classList.add('is-in');
