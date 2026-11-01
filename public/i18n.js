@@ -5,7 +5,8 @@
   'use strict';
   let lang = 'tr';
   try { lang = (JSON.parse(localStorage.getItem('crywall.prefs') || '{}').lang) || (navigator.language || 'tr').slice(0, 2); } catch {}
-  if (lang !== 'en') lang = 'tr';
+  const SUPPORTED = ['tr', 'en', 'de', 'es', 'fr', 'pt', 'it', 'ru', 'az'];
+  if (!SUPPORTED.includes(lang)) lang = 'tr';
   document.documentElement.lang = lang;
   window.CW_LANG = lang;
 
@@ -72,18 +73,21 @@
     'Hesap': 'Account', 'Veriler': 'Data', 'Favorileri temizle': 'Clear favorites', 'Ayarları sıfırla': 'Reset settings', 'Hakkında': 'About',
     'Sürüm': 'Version', 'Gizlilik': 'Privacy', 'Telif': 'Copyright', 'Giriş yapmadın': 'Not signed in',
     'Giriş yaparsan favorilerin her cihazda seninle olur.': 'Sign in to keep your favorites on every device.',
-    'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
+    'Daha fazla göster': 'Show more', 'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
     'VexWalls sadece favorilerini ve tercihlerini senin cihazında saklar.': 'Only your favorites and preferences are stored, on your own device.',
     'Bir manzara ara… dağ, okyanus, gece': 'Search a view… mountains, ocean, night',
     'Ara: dağ, okyanus, gece…': 'Search: mountains, ocean, night…',
     'Kategoriler · birine tıkla': 'Categories · pick one', 'Telif hakkı': 'Copyright', 'Gizlilik ve çerezler': 'Privacy and cookies',
     'Camgöbeği': 'Cyan', 'Mor': 'Purple', 'Yeşil': 'Green', 'Turuncu': 'Orange', 'Pembe': 'Pink', 'Mavi': 'Blue', 'Kırmızı': 'Red',
   };
+  // Turkish -> English (EN), then English -> the chosen language (i18n-langs.js), else English.
+  const X = (window.CW_LANGS && window.CW_LANGS[lang]) || {};
+  const one = (p) => { const e = EN[p]; return e ? (X[e] || e) : (X[p] || p); };
   const T = (s) => {
     if (lang === 'tr' || s == null) return s;
     const str = String(s), t = str.trim();
-    if (EN[t]) return str.replace(t, EN[t]);
-    if (t.includes(' · ')) return str.replace(t, t.split(' · ').map((p) => EN[p] || p).join(' · '));
+    if (EN[t]) return str.replace(t, one(t));
+    if (t.includes(' · ')) return str.replace(t, t.split(' · ').map(one).join(' · '));
     return str;
   };
   window.T = T;

@@ -666,9 +666,14 @@
   }
 
   // infinite scroll
-  const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) load(); }, { rootMargin: '900px' });
+  // Pages load by themselves for the first few screens, then a "Daha fazla göster" button takes
+  // over — otherwise the page never ends and nobody can reach the footer.
+  const AUTO_PAGES = 3;
+  const autoOK = () => S.page <= AUTO_PAGES;
+  function updateMore() { const b = $('#moreBtn'); if (b) b.hidden = autoOK() || S.done || S.mode === 'fav' || S.loading; }
+  const io = new IntersectionObserver((en) => { if (en[0].isIntersecting && autoOK()) load(); updateMore(); }, { rootMargin: '900px' });
   io.observe($('#sentinel'));
-  function checkSentinel() { const r = $('#sentinel').getBoundingClientRect(); if (r.top < innerHeight + 900) load(); }
+  function checkSentinel() { const r = $('#sentinel').getBoundingClientRect(); if (r.top < innerHeight + 900 && autoOK()) load(); updateMore(); }
 
   // ---------- viewer ----------
   let curIdx = -1, cur = null, curList = S.items;
@@ -890,6 +895,7 @@
   $('#contactMail').href = CONTACT_EMAIL ? 'mailto:' + CONTACT_EMAIL : 'https://github.com/VexWalls/vexwalls.github.io/issues/new?title=Kald%C4%B1rma%20talebi';
   $('#contactMail').target = '_blank';
   if (!CONTACT_EMAIL) $('#contactMail').textContent = 'GitHub üzerinden kaldırma talebi açarak bize';
+  $('#moreBtn').onclick = () => { load(); updateMore(); };
   $('#openFolder').onclick = () => api(API + '/api/open-folder').catch((e) => toast('Klasör açılamadı', serverHint(e), 'err'));
 
   // ---------- micro-interactions ----------
@@ -990,7 +996,10 @@
       if (ready.has(i)) return ready.get(i);
       const img = el('img', 'hslide__img'); img.alt = '';
       img.src = heroSrc(items[i]);
-      const p = img.decode().then(() => { slides[i].append(img); slides[i].classList.add('is-sharp'); })
+      const p = img.decode().then(() => {
+        slides[i].append(img); slides[i].classList.add('is-sharp');
+        if (i === idx) { try { localStorage.setItem('crywall.heroLast', items[i].full); } catch {} }   // shown instantly next visit
+      })
         .catch(() => {});                       // keep the thumbnail if it fails
       ready.set(i, p);
       return p;
@@ -1016,6 +1025,7 @@
       void cur.offsetWidth;                   // restart the transition
       cur.classList.add('is-active');
       idx = n;
+      try { localStorage.setItem('crywall.heroLast', items[n].full); } catch {}   // shown instantly on the next visit
       loadFull(n); loadFull(n + 1);
       $$('.hthumb', thumbs).forEach((t, i) => t.classList.toggle('is-active', i === n));
       $('.hthumb.is-active', thumbs)?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
@@ -1080,7 +1090,8 @@
     credit.onclick = () => openViewer(idx, items);
     document.addEventListener('visibilitychange', restart);
 
-    go(0);
+    // first slide waits (max 3.5 s) for its sharp picture; meanwhile the cached last picture shows
+    Promise.race([loadFull(0), new Promise((r) => setTimeout(r, $('#heroBg').style.background ? 3500 : 0))]).then(() => go(0));
     return {
       key(e) {
         if (!peek) return;
@@ -1135,12 +1146,16 @@
 
   // ---------- go ----------
   (async () => {
+    // Show the last hero picture right away (browser cache) and start the slideshow without
+    // waiting for anything else, so the top of the page is never an empty grey box.
+    try { const last = localStorage.getItem('crywall.heroLast'); if (last) $('#heroBg').style.background = `#0b0d14 url("${last}") center/cover no-repeat`; } catch {}
+    hero();
     await detectHelper();      // on the website: is the VexWalls PC helper running here?
     applyModeUI();
     renderCats();
     switchMode('static', false);
     reset();
-    hero();
+    // (hero already started above)
     status();
   })();
 })();

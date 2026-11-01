@@ -166,3 +166,10 @@ body { font-feature-settings: "cv11", "ss01"; }
 [data-mode="light"] .themes__menu button { color: var(--muted); }
 [data-mode="light"] .themes__menu button.is-active { color: var(--text); background: rgba(15,23,36,.06); }
 [data-mode="light"] .nav:not(.is-solid) .themes__menu button { color: #556072; }
+
+.st-select { min-width: 170px; padding: 9px 34px 9px 12px; border-radius: 10px; font-size: 14px; }
+
+/* "show more" after the first auto-loaded pages (so the footer can be reached) */
+.more { display: flex; justify-content: center; padding: 6px 0 34px; }
+.more__btn { padding: 13px 30px; border-radius: 999px; font-size: 14.5px; border-color: rgb(var(--accent-rgb) / .45); }
+.more__btn:hover { background: rgb(var(--accent-rgb) / .12); border-color: var(--accent); }

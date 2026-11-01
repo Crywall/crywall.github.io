@@ -44,7 +44,7 @@
       <div class="st-row"><span>${T('Tema')}</span>${seg('mode', prefs.mode === 'light' ? 'light' : 'dark', [['dark', 'Koyu'], ['light', 'Açık']])}</div>
       <div class="st-row st-row--col"><span>${T('Vurgu rengi')}</span>
         <div class="st-colors">${(th?.THEMES || []).map(([k, n, c]) => `<button data-accent="${k}" title="${T(n)}" class="${th.current() === k ? 'is-on' : ''}" style="--c:${c}"></button>`).join('')}</div></div>
-      <div class="st-row"><span>${T('Dil')}</span>${seg('lang', prefs.lang, [['tr', 'Türkçe'], ['en', 'English']])}</div>
+      <div class="st-row"><span>${T('Dil')}</span><select class="st-select" data-lang>${(window.CW_LANG_NAMES || [['tr', 'Türkçe'], ['en', 'English']]).map(([c, n]) => `<option value="${c}" ${c === (window.CW_LANG || prefs.lang) ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
 
       <h4>${T('Duvar kağıdı tercihleri')}</h4>
       <div class="st-row st-row--col"><span>${T('Ekran tipi')}</span>${seg('ratio', prefs.ratio, [['', 'Otomatik'], ['landscape', 'Bilgisayar'], ['portrait', 'Telefon'], ['21x9,32x9', 'Ultra geniş']])}</div>
@@ -81,6 +81,7 @@
     render();
     requestAnimationFrame(() => panel.classList.add('show'));
     panel.addEventListener('click', onClick);
+    panel.addEventListener('change', (e) => { const s = e.target.closest('[data-lang]'); if (s) { prefs.lang = s.value; save(); location.reload(); } });
   }
   function close() { if (!panel) return; const p = panel; panel = null; p.classList.remove('show'); setTimeout(() => p.remove(), 250); }
 
