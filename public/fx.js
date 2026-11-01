@@ -1,4 +1,4 @@
-/* CryWall — visual effects in the cryvextech.com.tr style:
+/* VexWalls — visual effects in the cryvextech.com.tr style:
    theme picker, intro, scroll progress, cursor ring, reveal-on-scroll,
    magnetic buttons, count-up and the scroll-reactive category strips. */
 (() => {
@@ -24,6 +24,7 @@
     menu.innerHTML = THEMES.map(([k, n, c]) => `<button data-t="${k}" class="${k === cur ? 'is-active' : ''}"><i style="background:${c};box-shadow:0 0 10px ${c}"></i>${n}</button>`).join('');
   }
   applyTheme(store.get('crywall.theme', ''));
+  window.CWTheme = { THEMES, apply: applyTheme, current: () => root.dataset.theme || '' };   // used by settings.js
   $('#themeBtn')?.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; });
   menu?.addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) { applyTheme(b.dataset.t); menu.hidden = true; } });
   document.addEventListener('click', (e) => { if (menu && !menu.hidden && !e.target.closest('.themes')) menu.hidden = true; });
@@ -104,6 +105,12 @@
       const row = { mq, track: mq.firstElementChild, dir: +mq.dataset.dir || -1, x: 0, hover: false, base: mq.classList.contains('mq--text') ? 0.3 : 0.4 };
       mq.addEventListener('pointerenter', () => (row.hover = true));
       mq.addEventListener('pointerleave', () => (row.hover = false));
+      // mouse wheel over a strip scrolls the strip itself (fast); outside it the page scrolls as usual
+      mq.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        row.x -= d * (e.deltaMode === 1 ? 32 : 1.1);
+      }, { passive: false });
       // drag to scrub
       mq.addEventListener('pointerdown', (e) => { row.drag = e.clientX; row.dragX = row.x; dragMoved = false; });
       rows.push(row);
@@ -128,7 +135,7 @@
     rows.forEach((r) => {
       const half = r.half;
       if (r.drag == null) {
-        r.x += r.base * r.dir * (r.hover ? 0.3 : 1);   // steady, slow drift — not tied to scrolling
+        if (!r.hover) r.x += r.base * r.dir;   // slow steady drift; stops while the mouse is on the strip
       }
       if (half) { while (r.x <= -half) r.x += half; while (r.x > 0) r.x -= half; }
       r.track.style.transform = `translate3d(${r.x}px,0,0)`;
@@ -155,7 +162,7 @@
   if (seen) return;
   const n = document.createElement('div');
   n.className = 'cookie';
-  n.innerHTML = `<div><b>🍪 Çerez yok, takip yok.</b><span>CryWall sadece favorilerini ve tercihlerini senin cihazında saklar. <a href="#" data-more>Ayrıntılar</a></span></div>
+  n.innerHTML = `<div><b>🍪 Çerez yok, takip yok.</b><span>VexWalls sadece favorilerini ve tercihlerini senin cihazında saklar. <a href="#" data-more>Ayrıntılar</a></span></div>
     <button class="btn btn--primary btn--sm" data-ok>Tamam</button>`;
   n.addEventListener('click', (e) => {
     if (e.target.closest('[data-more]')) { e.preventDefault(); dlg?.showModal(); }
@@ -163,4 +170,16 @@
   });
   document.body.append(n);
   setTimeout(() => n.classList.add('show'), 900);
+})();
+
+// ---------- hero: quick category buttons + live wallpaper count ----------
+(() => {
+  document.querySelector('.hero2__quick')?.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-quickcat]');
+    if (b && window.CryWall) window.CryWall.openCat(b.dataset.quickcat);
+  });
+  fetch('data/index.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+    const el = document.querySelector('.hero2__pill b');
+    if (d && d.wallpapers && el) el.textContent = new Intl.NumberFormat('tr-TR').format(Math.floor(d.wallpapers / 100) * 100) + '+';
+  }).catch(() => {});
 })();

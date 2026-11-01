@@ -1,6 +1,6 @@
-/* CryWall — user accounts (optional).
+/* VexWalls — user accounts (optional).
    Sign in with Google or e-mail + password (Firebase Authentication). Passwords are handled by
-   Google; CryWall never sees them. While signed in, favourites are kept in the user's own record
+   Google; VexWalls never sees them. While signed in, favourites are kept in the user's own record
    (Firestore users/{uid}) so they are the same on every device and never get lost.
    Security rule on the database: a user can only read/write their own record. */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -93,7 +93,7 @@ function navButton() {
     b = document.createElement('button');
     b.id = 'accBtn';
     b.className = 'acc-btn';
-    b.addEventListener('click', (e) => { e.stopPropagation(); user ? toggleMenu() : openDialog('login'); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
     themes.after(b);
   }
   if (user) {
@@ -113,21 +113,30 @@ function navButton() {
 let menu = null;
 function toggleMenu() {
   if (menu) { menu.remove(); menu = null; return; }
-  const name = user.displayName || (user.email || '').split('@')[0];
   menu = document.createElement('div');
   menu.className = 'acc-menu';
-  menu.innerHTML = `
-    <div class="acc-menu__head"><b>${esc(name)}</b><span>${esc(user.email || '')}</span>
-      ${user.emailVerified || user.providerData.some((p) => p.providerId === 'google.com') ? '' : '<em>E-postanı doğrulamayı unutma</em>'}</div>
-    <button data-a="favs">♥ Favorilerim</button>
-    <button data-a="out">Çıkış yap</button>
-    <button data-a="del" class="danger">Hesabımı sil</button>`;
+  if (user) {
+    const name = user.displayName || (user.email || '').split('@')[0];
+    menu.innerHTML = `
+      <div class="acc-menu__head"><b>${esc(name)}</b><span>${esc(user.email || '')}</span>
+        ${user.emailVerified || user.providerData.some((p) => p.providerId === 'google.com') ? '' : '<em>E-postanı doğrulamayı unutma</em>'}</div>
+      <button data-a="favs">♥ Favorilerim</button>
+      <button data-a="settings">⚙ Ayarlar</button>
+      <button data-a="out">Çıkış yap</button>`;
+  } else {
+    // guests: sign in, or just open the settings
+    menu.innerHTML = `
+      <button data-a="login" class="acc-menu__main">Giriş yap</button>
+      <button data-a="signup">Kayıt ol</button>
+      <button data-a="settings">⚙ Ayarlar</button>`;
+  }
   menu.addEventListener('click', async (e) => {
     const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
     menu.remove(); menu = null;
     if (a === 'favs') $('.tab[data-mode="fav"]')?.click();
-    if (a === 'out') { await signOut(auth); toast('Çıkış yapıldı', 'Favorilerin bu cihazda da duruyor.', 'ok'); }
-    if (a === 'del') deleteAccount();
+    if (a === 'settings') window.CWSettings?.open();
+    if (a === 'login' || a === 'signup') openDialog(a);
+    if (a === 'out') doSignOut();
   });
   document.body.append(menu);
   const r = $('#accBtn').getBoundingClientRect();
@@ -156,7 +165,7 @@ function openDialog(mode = 'login') {
     <div class="acc-dlg__card" role="dialog" aria-modal="true" aria-label="Giriş">
       <button class="acc-dlg__x" data-x aria-label="Kapat">✕</button>
       <img class="acc-dlg__logo" src="favicon.svg" alt="">
-      <h3>CryWall hesabı</h3>
+      <h3>VexWalls hesabı</h3>
       <p class="acc-dlg__sub">Favorilerin kaybolmasın, her cihazda seninle olsun.</p>
       <div class="acc-tabs"><button data-m="login">Giriş yap</button><button data-m="signup">Kayıt ol</button></div>
       <button class="acc-google" data-g>${G_LOGO}<span>Google ile devam et</span></button>
@@ -169,7 +178,7 @@ function openDialog(mode = 'login') {
         <button class="btn btn--primary acc-submit" type="submit">Giriş yap</button>
         <button class="acc-link" type="button" data-reset>Şifremi unuttum</button>
       </form>
-      <div class="acc-trust">${ICON_LOCK}<span>Giriş, <b>Google Firebase</b> güvenliğiyle yapılır. Şifren şifrelenerek saklanır; <b>CryWall şifreni göremez</b>. Reklam yok, bilgilerin satılmaz. Hesabını istediğin an silebilirsin. <a href="#" data-privacy>Gizlilik</a></span></div>
+      <div class="acc-trust">${ICON_LOCK}<span>Giriş, <b>Google Firebase</b> güvenliğiyle yapılır. Şifren şifrelenerek saklanır; <b>VexWalls şifreni göremez</b>. Reklam yok, bilgilerin satılmaz. Hesabını istediğin an silebilirsin. <a href="#" data-privacy>Gizlilik</a></span></div>
     </div>`;
   document.body.append(dlg);
   const form = $('.acc-form', dlg), err = $('.acc-err', dlg);
@@ -244,4 +253,5 @@ onAuthStateChanged(auth, async (u) => {
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', navButton); else navButton();
 // "Giriş yap" can also be opened from elsewhere (e.g. the favourites page)
-window.CryWallAccount = { open: openDialog, get user() { return user; } };
+async function doSignOut() { await signOut(auth); toast('Çıkış yapıldı', 'Favorilerin bu cihazda da duruyor.', 'ok'); }
+window.CryWallAccount = { open: openDialog, signOut: doSignOut, deleteAccount: () => user && deleteAccount(), get user() { return user; } };

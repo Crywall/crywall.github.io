@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 $Port    = 8790
 $Root    = $PSScriptRoot
 $Public  = Join-Path $Root 'public'
-$SaveDir = Join-Path ([Environment]::GetFolderPath('MyPictures')) 'CryWall'
+$SaveDir = Join-Path ([Environment]::GetFolderPath('MyPictures')) 'VexWalls'
 $PidFile = Join-Path $env:TEMP 'crywall_live.json'
 $UA      = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 New-Item -ItemType Directory -Force $SaveDir | Out-Null
@@ -209,19 +209,19 @@ function Get-Html([string]$url) { Get-Cached $url 1800 }
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$Port/")
 try { $listener.Start() } catch {
-    Write-Host "CryWall zaten calisiyor olabilir. Tarayici aciliyor..."
+    Write-Host "VexWalls zaten calisiyor olabilir. Tarayici aciliyor..."
     if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
     exit
 }
 Write-Host ""
-Write-Host "  CRYWALL calisiyor:  http://localhost:$Port/" -ForegroundColor Cyan
+Write-Host "  VEXWALLS calisiyor:  http://localhost:$Port/" -ForegroundColor Cyan
 Write-Host "  Kapatmak icin bu pencereyi kapatin." -ForegroundColor DarkGray
 Write-Host ""
 if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
 
 # Web pages allowed to talk to this PC helper. Any other website is refused, so a random
 # site can't change your wallpaper.
-$AllowedOrigins = @('https://crywall.github.io', "http://localhost:$Port", "http://127.0.0.1:$Port")
+$AllowedOrigins = @('https://vexwalls.github.io', 'https://crywall.github.io', "http://localhost:$Port", "http://127.0.0.1:$Port")
 
 $Mime = @{ '.html' = 'text/html; charset=utf-8'; '.css' = 'text/css; charset=utf-8'; '.js' = 'application/javascript; charset=utf-8'
            '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.ico' = 'image/x-icon'; '.json' = 'application/json'; '.webmanifest' = 'application/manifest+json'; '.webp' = 'image/webp' }

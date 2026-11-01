@@ -1,12 +1,12 @@
-# CryWall
+# VexWalls
 
-**Ücretsiz 4K ve hareketli duvar kağıtları** — https://crywall.github.io
+**Ücretsiz 4K ve hareketli duvar kağıtları** — https://vexwalls.github.io
 
 Doğa, uzay, şehir, anime manzara, siberpunk, minimal ve daha fazlası. Bilgisayar ve telefon için, her gün otomatik güncellenen seçki.
 
 ## İki sürüm
 
-| | Web sitesi (crywall.github.io) | Bilgisayar sürümü (`Baslat.bat`) |
+| | Web sitesi (vexwalls.github.io) | Bilgisayar sürümü (`Baslat.bat`) |
 |---|---|---|
 | Açmak için | Herhangi bir tarayıcı, telefon dahil | Windows'ta `Baslat.bat` |
 | Duvar kağıtları | Her gece hazırlanan katalog | Canlı arama |
@@ -19,4 +19,4 @@ Doğa, uzay, şehir, anime manzara, siberpunk, minimal ve daha fazlası. Bilgisa
 - `server.ps1`, `live.ps1`, `Baslat.bat` — bilgisayar sürümü
 
 ## Kaynaklar ve telif
-Görseller [Wallhaven](https://wallhaven.cc), hareketli videolar [MotionBGs](https://motionbgs.com) ve [Mixkit](https://mixkit.co) üzerinden gösterilir; CryWall dosyaları barındırmaz ve her içerikte kaynağına bağlantı verir. Oyun, film, dizi, çizgi roman ve anime serilerine ait karakterler ile ünlü kişiler listelenmez. Hak sahibiyseniz kaldırma talebi için bir issue açabilirsiniz.
+Görseller [Wallhaven](https://wallhaven.cc), hareketli videolar [MotionBGs](https://motionbgs.com) ve [Mixkit](https://mixkit.co) üzerinden gösterilir; VexWalls dosyaları barındırmaz ve her içerikte kaynağına bağlantı verir. Oyun, film, dizi, çizgi roman ve anime serilerine ait karakterler ile ünlü kişiler listelenmez. Hak sahibiyseniz kaldırma talebi için bir issue açabilirsiniz.

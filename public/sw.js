@@ -1,8 +1,8 @@
-/* CryWall service worker — makes the site installable as an app and keeps it
+/* VexWalls service worker — makes the site installable as an app and keeps it
    working on a bad connection. Network first; the cached copy is only a fallback,
    so updates always show up. Pictures from other sites are not cached here. */
-const CACHE = 'crywall-v3';
-const SHELL = ['./', 'index.html', 'styles.css', 'theme.css', 'app.js', 'fx.js', 'pwa.js', 'account.js', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
+const CACHE = 'crywall-v4';
+const SHELL = ['./', 'index.html', 'styles.css', 'theme.css', 'app.js', 'fx.js', 'pwa.js', 'account.js', 'i18n.js', 'settings.js', 'settings.css', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

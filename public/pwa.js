@@ -1,9 +1,9 @@
-/* CryWall — install as an app.
+/* VexWalls — install as an app.
    Phones: a small "Uygulamayı yükle" banner (Android installs in one tap; iPhone shows the steps).
    Computers: a "Telefona yükle" button with a QR code, so nobody has to type the address. */
 (() => {
   'use strict';
-  const SITE = 'https://crywall.github.io/';
+  const SITE = 'https://vexwalls.github.io/';
   const q = new URLSearchParams(location.search);
   const isRemote = !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
   const isPhone = (matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820) || q.has('phone');
@@ -56,8 +56,8 @@
          <li><b>"Uygulamayı yükle"</b> ya da <b>"Ana ekrana ekle"</b>yi seç</li>
          <li><b>Yükle</b>'ye bas</li>`;
     openSheet(`<img class="pwa-sheet__icon" src="icon-192.png" alt="">
-      <h3>CryWall'ı telefonuna yükle</h3>
-      <p>Ana ekranına CryWall simgesi gelir; adres yazmadan, uygulama gibi tam ekran açılır.</p>
+      <h3>VexWalls'u telefonuna yükle</h3>
+      <p>Ana ekranına VexWalls simgesi gelir; adres yazmadan, uygulama gibi tam ekran açılır.</p>
       <ol class="pwa-steps">${steps}</ol>`);
   }
 
@@ -68,7 +68,7 @@
     if (installed || store.get('crywall.installHidden') === '1') return;
     banner = document.createElement('div');
     banner.className = 'pwa-banner';
-    banner.innerHTML = `<img src="icon-192.png" alt=""><div><b>CryWall uygulaması</b><span>Ana ekrana ekle, tek dokunuşla aç</span></div>
+    banner.innerHTML = `<img src="icon-192.png" alt=""><div><b>VexWalls uygulaması</b><span>Ana ekrana ekle, tek dokunuşla aç</span></div>
       <button class="btn btn--primary btn--sm" data-i>${DL_ICON}Yükle</button><button class="pwa-banner__x" data-c aria-label="Kapat">✕</button>`;
     banner.addEventListener('click', (e) => {
       if (e.target.closest('[data-i]')) install();
@@ -89,14 +89,14 @@
   async function showQr() {
     const link = SITE + '?install=1';
     openSheet(`<h3>Telefonuna yükle</h3>
-      <p>Telefonunun kamerasıyla bu kodu okut. CryWall açılır ve <b>"Yükle"</b>ye basınca ana ekranına uygulama olarak eklenir.</p>
+      <p>Telefonunun kamerasıyla bu kodu okut. VexWalls açılır ve <b>"Yükle"</b>ye basınca ana ekranına uygulama olarak eklenir.</p>
       <div class="pwa-qr" id="pwaQr"><span>QR kod hazırlanıyor…</span></div>
-      <p class="pwa-link">ya da telefonda şunu aç: <b>crywall.github.io</b></p>`);
+      <p class="pwa-link">ya da telefonda şunu aç: <b>vexwalls.github.io</b></p>`);
     try {
       await loadQr();
       const qr = window.qrcode(0, 'M'); qr.addData(link); qr.make();
       const box = document.getElementById('pwaQr'); if (box) box.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-    } catch { const box = document.getElementById('pwaQr'); if (box) box.innerHTML = '<span>QR yüklenemedi — telefonda crywall.github.io adresini aç.</span>'; }
+    } catch { const box = document.getElementById('pwaQr'); if (box) box.innerHTML = '<span>QR yüklenemedi — telefonda vexwalls.github.io adresini aç.</span>'; }
   }
 
   function start() {
@@ -138,9 +138,10 @@
     if (!v || !v.v) return;                       // PC version (no version file): nothing to show
     current = v.v;
     const brand = document.querySelector('.nav .brand');
-    if (brand && !brand.querySelector('.ver')) brand.insertAdjacentHTML('beforeend', `<span class="ver" title="Son güncelleme: ${v.date || ''}">v${v.v}</span>`);
+    window.CW_VERSION = v;    // shown in Settings and at the bottom of the page (not in the menu bar)
+    const legal = document.querySelector('.footer__legal'); if (legal && !legal.querySelector('.ver-foot')) legal.insertAdjacentHTML('beforeend', ` · <span class="ver-foot">v${v.v}</span>`);
     let seen = null; try { seen = localStorage.getItem('crywall.ver'); localStorage.setItem('crywall.ver', v.v); } catch {}
-    if (seen && seen !== v.v) note(`CryWall güncellendi: v${v.v}`);
+    if (seen && seen !== v.v) note(`VexWalls güncellendi: v${v.v}`);
   }
   async function check() {
     if (!current || document.hidden) return;

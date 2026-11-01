@@ -1,4 +1,4 @@
-/* CryWall — front end */
+/* VexWalls — front end */
 (() => {
   'use strict';
 
@@ -103,7 +103,7 @@
     if (!r.ok || j.ok === false) throw new Error(j.error || ('HTTP ' + r.status));
     return j;
   }
-  // c = the CryWall category the picture came from (shown on the card)
+  // c = the VexWalls category the picture came from (shown on the card)
   const toImg = (w, c) => ({
     kind: 'img', id: w.id, thumb: w.thumbs.large, tall: w.thumbs.original, small: w.thumbs.small, full: w.path,
     w: w.dimension_x, h: w.dimension_y, res: w.resolution, ratio: w.ratio, size: w.file_size,
@@ -198,7 +198,7 @@
   const IS_PHONE = (matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820) || new URLSearchParams(location.search).has('phone');
   const IS_REMOTE = !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
   // ONLINE = website without the PC helper (catalog files, "İndir").
-  // When crywall.github.io is opened on a PC where the CryWall helper runs (server.ps1, started
+  // When vexwalls.github.io is opened on a PC where the VexWalls helper runs (server.ps1, started
   // with Windows), detectHelper() switches back to full "Uygula" mode through http://localhost:8790.
   let ONLINE = IS_REMOTE || new URLSearchParams(location.search).has('online');
   let PHONE_MODE = IS_PHONE || ONLINE;
@@ -246,7 +246,7 @@
       const st = await lnaState();
       t.set('Bağlanılamadı', st === 'denied'
         ? 'Tarayıcı izni kapalı: adres çubuğundaki kilit simgesi › Site izinleri › "Yerel ağ" / "Diğer uygulamalar" › İzin ver.'
-        : 'CryWall yardımcısı bu bilgisayarda çalışmıyor. Belgeler › CryWall › Baslat.bat ile başlat.', 'err', 9000);
+        : 'VexWalls yardımcısı bu bilgisayarda çalışmıyor. Belgeler › VexWalls › Baslat.bat ile başlat.', 'err', 9000);
     }
   }
   function applyModeUI() {
@@ -254,7 +254,7 @@
     document.documentElement.classList.toggle('phone-mode', PHONE_MODE);
     if (ONLINE) {
       // the website can't change the computer's wallpaper: adjust the promises in the hero
-      const sub = $('.hero__sub'); if (sub) sub.innerHTML = 'İnternetin en beğenilen duvar kağıtları tek yerde. Beğen, indir, <b>bilgisayarına ya da telefonuna koy.</b>';
+      // website: same promise, without 'apply' wording (handled by the helper / download)
       const st = $$('.hero__stats > div')[2]; if (st) st.innerHTML = '<b>Ücretsiz</b><span>Bilgisayar &amp; telefon</span>';
     }
   }
@@ -277,7 +277,7 @@
       const file = new File([blob], 'crywall-' + it.id + (blob.type === 'image/png' ? '.png' : '.jpg'), { type: blob.type });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         t.kill();
-        await navigator.share({ files: [file], title: 'CryWall duvar kağıdı' }).catch(() => {});
+        await navigator.share({ files: [file], title: 'VexWalls duvar kağıdı' }).catch(() => {});
       } else {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = file.name; document.body.append(a); a.click(); a.remove();
@@ -329,7 +329,7 @@
         t.set(target === 'both' ? 'Masaüstü uygulandı, kilit ekranı uygulanamadı' : 'Kilit ekranı uygulanamadı',
           'Ayarlar › Kişiselleştirme › Kilit ekranı: "Resim" seçili olmalı.', 'err', 7000);
       } else {
-        t.set(`${TARGET_TXT[target]} uygulandı${where}`, 'Resimler › CryWall klasörüne de kaydedildi.', 'ok');
+        t.set(`${TARGET_TXT[target]} uygulandı${where}`, 'Resimler › VexWalls klasörüne de kaydedildi.', 'ok');
       }
       if (target !== 'lock') status();
     } catch (e) {
@@ -338,7 +338,7 @@
   }
   async function saveImg(it) {
     const t = toast('Kaydediliyor…', '', 'wait', 0);
-    try { await api(API + '/api/save', { url: it.full }); t.set('İndirildi', 'Resimler › CryWall klasörüne kaydedildi.', 'ok'); }
+    try { await api(API + '/api/save', { url: it.full }); t.set('İndirildi', 'Resimler › VexWalls klasörüne kaydedildi.', 'ok'); }
     catch (e) { t.set('İndirilemedi', serverHint(e), 'err', 6000); }
   }
   async function applyLive(it) {
@@ -357,7 +357,7 @@
       await status();
     } catch (e) { toast('Durdurulamadı', serverHint(e), 'err'); }
   }
-  const serverHint = (e) => (/Failed to fetch|NetworkError/i.test(e.message) ? 'CryWall sunucusu kapalı. Baslat.bat ile tekrar aç.' : e.message);
+  const serverHint = (e) => (/Failed to fetch|NetworkError/i.test(e.message) ? 'VexWalls sunucusu kapalı. Baslat.bat ile tekrar aç.' : e.message);
 
   function renderLiveBar() {
     const L = S.lives;
@@ -597,7 +597,7 @@
   function showEmpty(msg, blocked) {
     const e = $('#empty');
     e.hidden = false;
-    e.innerHTML = blocked ? '<b>Bu içerik CryWall\'da yok</b>Telif hakkı nedeniyle oyun, film, dizi ve anime karakterlerine ait duvar kağıtlarını yayınlamıyoruz. Doğa, uzay, şehir veya sanat aramayı dene.'
+    e.innerHTML = blocked ? '<b>Bu içerik VexWalls\'da yok</b>Telif hakkı nedeniyle oyun, film, dizi ve anime karakterlerine ait duvar kağıtlarını yayınlamıyoruz. Doğa, uzay, şehir veya sanat aramayı dene.'
       : msg ? `<b>Bir sorun oluştu</b>${esc(msg)}`
       : S.mode === 'fav' ? '<b>Henüz favorin yok</b>Beğendiğin duvar kağıtlarındaki ♥ işaretine bas, burada toplansın.' + (window.CryWallAccount && !window.CryWallAccount.user ? '<br><br><button class="btn btn--primary btn--sm" onclick="CryWallAccount.open(\'signup\')">Giriş yap · favorilerin kaybolmasın</button>' : '')
       : '<b>Sonuç bulunamadı</b>Farklı bir kelime veya daha düşük çözünürlük dene.';
@@ -756,7 +756,7 @@
         a.insertAdjacentHTML('afterbegin', `
           <div class="connect">
             <b>Tek tıkla masaüstüne uygula</b>
-            <span>CryWall yardımcısı bu bilgisayarda çalışıyorsa bağlan; duvar kağıdı doğrudan uygulanır.</span>
+            <span>VexWalls yardımcısı bu bilgisayarda çalışıyorsa bağlan; duvar kağıdı doğrudan uygulanır.</span>
             <button class="btn btn--primary" data-act="connect">${ICON.monitor}Bu bilgisayara bağlan</button>
           </div>`);
       }
@@ -887,7 +887,7 @@
   // Set this before publishing: where copyright owners can send removal requests.
   const CONTACT_EMAIL = '';
   $('#openCopyright').onclick = () => $('#copyright').showModal();
-  $('#contactMail').href = CONTACT_EMAIL ? 'mailto:' + CONTACT_EMAIL : 'https://github.com/Crywall/crywall.github.io/issues/new?title=Kald%C4%B1rma%20talebi';
+  $('#contactMail').href = CONTACT_EMAIL ? 'mailto:' + CONTACT_EMAIL : 'https://github.com/VexWalls/vexwalls.github.io/issues/new?title=Kald%C4%B1rma%20talebi';
   $('#contactMail').target = '_blank';
   if (!CONTACT_EMAIL) $('#contactMail').textContent = 'GitHub üzerinden kaldırma talebi açarak bize';
   $('#openFolder').onclick = () => api(API + '/api/open-folder').catch((e) => toast('Klasör açılamadı', serverHint(e), 'err'));
@@ -1019,7 +1019,7 @@
       loadFull(n); loadFull(n + 1);
       $$('.hthumb', thumbs).forEach((t, i) => t.classList.toggle('is-active', i === n));
       $('.hthumb.is-active', thumbs)?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-      $('span', credit).textContent = items[n].res;
+      $('span', credit).textContent = (items[n].catName ? items[n].catName + ' · ' : '') + (items[n].w >= 3840 ? '4K' : items[n].res);
       restart();
     }
     const next = () => go(idx + 1, 1);
@@ -1038,7 +1038,7 @@
       clearTimeout(timer);
       heroEl.style.setProperty('--hero-ms', HERO_MS + 'ms');
       heroEl.classList.remove('is-ticking'); void heroEl.offsetWidth;
-      if (!peek && !document.hidden) { heroEl.classList.add('is-ticking'); timer = setTimeout(autoNext, HERO_MS); }
+      if (!peek && !document.hidden && window.CWPrefs?.autoplay !== false) { heroEl.classList.add('is-ticking'); timer = setTimeout(autoNext, HERO_MS); }
     }
 
     // peek mode: text fades when the pointer rests on the picture (not on the text / search)
@@ -1101,10 +1101,18 @@
       renderLiveBar();
       if (cur && !$('#viewer').hidden) renderActions(cur);
     }
-    catch { if (!PHONE_MODE) toast('CryWall sunucusu bulunamadı', 'Siteyi Baslat.bat ile açarsan "Uygula" butonları çalışır.', 'err', 9000); }
+    catch { if (!PHONE_MODE) toast('VexWalls sunucusu bulunamadı', 'Siteyi Baslat.bat ile açarsan "Uygula" butonları çalışır.', 'err', 9000); }
   }
   S.mon = store.get('crywall.mon', 'all');
   if (IS_PHONE) { S.ratio = 'portrait'; const rs = $('#ratioSel'); if (rs) rs.value = 'portrait'; }   // phones: tall wallpapers by default
+  // user's saved preferences (Settings panel)
+  function applyPrefs(p, doReset = true) {
+    if (!p) return;
+    if (p.ratio) { S.ratio = p.ratio; const rs = $('#ratioSel'); if (rs) rs.value = p.ratio; }
+    if (p.res) { S.res = p.res; const rr = $('#resSel'); if (rr) rr.value = p.res; }
+    if (doReset) reset(true);
+  }
+  applyPrefs(window.CWPrefs, false);
 
   // small API used by fx.js (flowing category strips)
   window.CryWall = {
@@ -1112,6 +1120,7 @@
     openCat(key) { const c = CATS.find((x) => x.key === key); if (!c) return; S.cat = c; S.q = ""; S.colors = ""; S.title = c.name; switchMode("static", false); renderCats(); reset("force"); },
     openLive(key) { S.liveCat = key; switchMode("live", false); renderCats(); reset("force"); },
     // favourites, used by account.js to keep them in the user's account
+    applyPrefs,
     getFavs: () => favs.slice(),
     favKey,
     setFavs(list) {
@@ -1126,7 +1135,7 @@
 
   // ---------- go ----------
   (async () => {
-    await detectHelper();      // on the website: is the CryWall PC helper running here?
+    await detectHelper();      // on the website: is the VexWalls PC helper running here?
     applyModeUI();
     renderCats();
     switchMode('static', false);

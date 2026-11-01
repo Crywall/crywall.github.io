@@ -3,35 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CryWall — Ücretsiz 4K Duvar Kağıtları ve Hareketli Duvar Kağıtları</title>
-  <meta name="description" content="CryWall: ücretsiz 4K ve Full HD duvar kağıtları. Doğa, uzay, şehir, anime manzara, siberpunk, minimal ve hareketli (canlı) duvar kağıtları. Bilgisayar ve telefon için her gün güncellenen seçki.">
-  <meta name="keywords" content="CryWall, duvar kağıdı, duvar kağıtları, 4K duvar kağıdı, hareketli duvar kağıdı, canlı duvar kağıdı, wallpaper, 4K wallpaper, live wallpaper, telefon duvar kağıdı, masaüstü arka planı">
+  <title>VexWalls — Ücretsiz 4K Duvar Kağıtları ve Hareketli Duvar Kağıtları</title>
+  <meta name="description" content="VexWalls: ücretsiz 4K ve Full HD duvar kağıtları. Doğa, uzay, şehir, anime manzara, siberpunk, minimal ve hareketli (canlı) duvar kağıtları. Bilgisayar ve telefon için her gün güncellenen seçki.">
+  <meta name="keywords" content="VexWalls, duvar kağıdı, duvar kağıtları, 4K duvar kağıdı, hareketli duvar kağıdı, canlı duvar kağıdı, wallpaper, 4K wallpaper, live wallpaper, telefon duvar kağıdı, masaüstü arka planı">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#070a0e">
-  <link rel="canonical" href="https://crywall.github.io/">
+  <link rel="canonical" href="https://vexwalls.github.io/">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="CryWall">
+  <meta property="og:site_name" content="VexWalls">
   <meta property="og:locale" content="tr_TR">
-  <meta property="og:title" content="CryWall — Ücretsiz 4K ve Hareketli Duvar Kağıtları">
+  <meta property="og:title" content="VexWalls — Ücretsiz 4K ve Hareketli Duvar Kağıtları">
   <meta property="og:description" content="Doğa, uzay, şehir, anime manzara ve hareketli duvar kağıtları. Bilgisayar ve telefon için ücretsiz.">
-  <meta property="og:url" content="https://crywall.github.io/">
-  <meta property="og:image" content="https://crywall.github.io/og.jpg">
+  <meta property="og:url" content="https://vexwalls.github.io/">
+  <meta property="og:image" content="https://vexwalls.github.io/og.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="CryWall — Ücretsiz 4K ve Hareketli Duvar Kağıtları">
-  <meta name="twitter:image" content="https://crywall.github.io/og.jpg">
+  <meta name="twitter:title" content="VexWalls — Ücretsiz 4K ve Hareketli Duvar Kağıtları">
+  <meta name="twitter:image" content="https://vexwalls.github.io/og.jpg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="CryWall">
+  <meta name="apple-mobile-web-app-title" content="VexWalls">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"CryWall","alternateName":["Cry Wall","CryWall Duvar Kağıtları"],"url":"https://crywall.github.io/","description":"Ücretsiz 4K ve hareketli duvar kağıtları","inLanguage":"tr"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"VexWalls","alternateName":["Cry Wall","VexWalls Duvar Kağıtları"],"url":"https://vexwalls.github.io/","description":"Ücretsiz 4K ve hareketli duvar kağıtları","inLanguage":"tr"}</script>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="settings.css">
+  <script>/* apply light/dark before the page paints (no flash) */try{var p=JSON.parse(localStorage.getItem("crywall.prefs")||"{}");var l=p.mode==="light"||(p.mode==="system"&&matchMedia("(prefers-color-scheme: light)").matches);document.documentElement.dataset.mode=l?"light":"dark";if(p.calm)document.documentElement.classList.add("calm")}catch(e){}</script>
 </head>
 <body>
 <div id="prog"></div>
@@ -61,7 +63,7 @@
       <circle class="logo-spark logo-spark--2" cx="6" cy="44" r="1.6" fill="#ecfeff"/>
     </svg>
 
-      <span class="brand__name">Cry<span>Wall</span></span>
+      <span class="brand__name">Vex<span>Walls</span></span>
     </a>
     <nav class="tabs" aria-label="Bölümler">
       <button class="tab is-active" data-mode="static">Duvar Kağıtları</button>
@@ -88,22 +90,20 @@
 <section class="hero" id="hero">
   <div class="hero__bg" id="heroBg"></div>
   <div class="hero__shade"></div>
-  <div class="hero__content">
-    <p class="eyebrow">CryWall · Her gün güncellenen seçki</p>
-    <h1>Ekranına <span class="grad">hayat ver.</span></h1>
-    <p class="hero__sub">İnternetin en beğenilen duvar kağıtları tek yerde. Beğen, tıkla, <b>masaüstüne ve kilit ekranına anında uygula.</b></p>
+  <div class="hero__content hero2">
+    <p class="hero2__pill"><i></i><b>1.900+</b> duvar kağıdı <span>·</span> her gece yenilenir</p>
+    <h1 class="hero2__title">Her açılışta<br><em>yeni bir manzara.</em></h1>
+    <p class="hero__sub hero2__sub">Dağlar, denizler, uzay ve sanat — en sevilen duvar kağıtları tek tıkla ekranında.</p>
     <form class="search search--hero" id="heroSearch" role="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.96 12.06l4.24 4.24-1.42 1.42-4.24-4.24A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
-      <input type="search" placeholder="Ne arıyorsun? Örn: orman, uzay, neon şehir" autocomplete="off">
+      <input type="search" placeholder="Bir manzara ara… dağ, okyanus, gece" autocomplete="off">
       <button class="btn btn--primary" type="submit">Ara</button>
     </form>
-    <div class="hero__stats">
-      <div><b>4K</b><span>Ultra HD kalite</span></div>
-      <div><b><span data-count="15">15</span>+</b><span>Kategori</span></div>
-      <div><b>1 tık</b><span>Masaüstü &amp; kilit ekranı</span></div>
+    <div class="hero2__quick"><span>Popüler</span>
+      <button data-quickcat="dag">Dağ</button><button data-quickcat="deniz">Deniz</button><button data-quickcat="uzay">Uzay</button><button data-quickcat="orman">Orman</button><button data-quickcat="samuray">Samuray</button><button data-quickcat="minimal">Minimal</button>
     </div>
   </div>
-  <button class="hero__credit" id="heroCredit" hidden>Bu görsel: <span></span> ›</button>
+  <button class="hero__credit hero2__now" id="heroCredit" hidden><small>Şu an</small> <span></span> ›</button>
 
   <!-- shown while the pointer rests on the picture -->
   <div class="hero__peek" aria-hidden="false">
@@ -179,13 +179,13 @@
 <footer class="footer">
   <div class="footer__inner">
     <div class="brand"><img class="brand__mark" src="favicon.svg" alt="">
-<span class="brand__name">Cry<span>Wall</span></span></div>
+<span class="brand__name">Vex<span>Walls</span></span></div>
     <p>Görseller <a href="https://wallhaven.cc" target="_blank" rel="noopener">Wallhaven</a>, hareketli videolar <a href="https://motionbgs.com" target="_blank" rel="noopener">MotionBGs</a> ve <a href="https://mixkit.co" target="_blank" rel="noopener">Mixkit</a> üzerinden gelir. Tüm hakları sahiplerine aittir.</p>
     <button class="btn btn--sm btn--ghost" id="openCopyright">Telif &amp; kaldırma talebi</button>
     <button class="btn btn--sm btn--ghost" id="openPrivacy">Gizlilik &amp; çerezler</button>
     <button class="btn btn--sm btn--ghost" id="openFolder">İndirilenler klasörünü aç</button>
   </div>
-  <div class="footer__legal">© 2026 CryWall · Tüm hakları saklıdır. · Ücretsiz duvar kağıtları</div>
+  <div class="footer__legal">© 2026 VexWalls · Tüm hakları saklıdır. · Ücretsiz duvar kağıtları</div>
 </footer>
 
 <dialog class="legal" id="privacy">
@@ -194,10 +194,10 @@
     <p class="eyebrow">Gizlilik</p>
     <h3>Gizlilik ve çerezler</h3>
     <p><b>Reklam ya da izleme çerezi kullanmıyoruz.</b> Seni takip etmiyor, verini kimseyle paylaşmıyor ve satmıyoruz.</p>
-    <p>Hesap açmadan kullanırsan CryWall yalnızca senin cihazında, tarayıcının kendi deposunda şunları saklar: favorilerin, seçtiğin tema rengi, ekran tercihin ve bu bildirimi gördüğün.</p>
-    <p><b>Hesap açarsan</b> (isteğe bağlı): giriş Google Firebase ile yapılır. Şifren Google tarafından şifrelenerek saklanır, <b>CryWall şifreni hiçbir zaman göremez</b>. Hesabında sadece e-posta adresin, adın (yazdıysan) ve favorilerin tutulur; bu bilgilere senden başka kimse erişemez. Hesabını menüdeki "Hesabımı sil" ile istediğin an tamamen silebilirsin.</p>
+    <p>Hesap açmadan kullanırsan VexWalls yalnızca senin cihazında, tarayıcının kendi deposunda şunları saklar: favorilerin, seçtiğin tema rengi, ekran tercihin ve bu bildirimi gördüğün.</p>
+    <p><b>Hesap açarsan</b> (isteğe bağlı): giriş Google Firebase ile yapılır. Şifren Google tarafından şifrelenerek saklanır, <b>VexWalls şifreni hiçbir zaman göremez</b>. Hesabında sadece e-posta adresin, adın (yazdıysan) ve favorilerin tutulur; bu bilgilere senden başka kimse erişemez. Hesabını menüdeki "Hesabımı sil" ile istediğin an tamamen silebilirsin.</p>
     <p>Görseller ve videolar kaynak sitelerden (Wallhaven, MotionBGs, Mixkit) yüklenir; bu siteler kendi gizlilik kurallarına tabidir. Site GitHub Pages üzerinde, şifreli (HTTPS) bağlantıyla yayınlanır.</p>
-    <p>Bilgisayarındaki "CryWall yardımcısı" sadece senin bilgisayarında çalışır; yalnızca crywall.github.io'dan ve bilgisayarın kendisinden gelen istekleri kabul eder.</p>
+    <p>Bilgisayarındaki "VexWalls yardımcısı" sadece senin bilgisayarında çalışır; yalnızca vexwalls.github.io'dan ve bilgisayarın kendisinden gelen istekleri kabul eder.</p>
   </form>
 </dialog>
 
@@ -206,7 +206,7 @@
     <button class="viewer__close" aria-label="Kapat">✕</button>
     <p class="eyebrow">Telif hakkı</p>
     <h3>Telif hakkı ve kaldırma talebi</h3>
-    <p>CryWall görselleri kendi sunucularında barındırmaz. Görseller ve videolar kaynak sitelerden (Wallhaven, MotionBGs, Mixkit) gösterilir ve her birinde kaynağına bağlantı vardır.</p>
+    <p>VexWalls görselleri kendi sunucularında barındırmaz. Görseller ve videolar kaynak sitelerden (Wallhaven, MotionBGs, Mixkit) gösterilir ve her birinde kaynağına bağlantı vardır.</p>
     <p>Oyun, film, dizi, çizgi roman ve anime serilerine ait karakterleri ya da ünlü kişileri içeren içerikler bilerek listelenmez.</p>
     <p>Bir içeriğin hak sahibiyseniz ve kaldırılmasını istiyorsanız, içeriğin bağlantısıyla birlikte <a id="contactMail" href="#">iletişim adresimize</a> yazın. Talepler en geç 48 saat içinde işleme alınır.</p>
   </form>
@@ -256,6 +256,8 @@
 
 <div class="toasts" id="toasts"></div>
 
+<script src="i18n.js"></script>
+<script src="settings.js"></script>
 <script src="app.js"></script>
 <script src="fx.js"></script>
 <script src="pwa.js"></script>
