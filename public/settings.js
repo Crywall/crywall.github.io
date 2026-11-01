@@ -56,6 +56,10 @@
         <button class="st-item" data-act="logout">${T('Çıkış yap')}</button>
         <button class="st-item st-danger" data-act="delete">${T('Hesabımı sil')}</button>` : ''}
 
+      <h4>${T('Kitaplığım')}</h4>
+      <button class="st-item" data-act="favs">♥ ${T('Favorilerim')}</button>
+      <button class="st-item" data-act="recent">🕘 ${T('Son kullanılanlar')}</button>
+
       <h4>${T('Veriler')}</h4>
       <button class="st-item" data-act="clearfavs">${T('Favorileri temizle')}</button>
       <button class="st-item" data-act="reset">${T('Ayarları sıfırla')}</button>
@@ -109,6 +113,8 @@
     if (a === 'login') { close(); window.CryWallAccount?.open('login'); }
     if (a === 'logout') { close(); window.CryWallAccount?.signOut(); }
     if (a === 'delete') { close(); window.CryWallAccount?.deleteAccount(); }
+    if (a === 'favs') { close(); document.querySelector('.tab[data-mode="fav"]')?.click(); }
+    if (a === 'recent') { close(); window.CryWall?.openRecent?.(); }
     if (a === 'privacy') { document.getElementById('privacy')?.showModal(); }
     if (a === 'copyright') { document.getElementById('copyright')?.showModal(); }
     if (a === 'clearfavs' && confirm(T('Tüm favoriler silinsin mi?'))) { window.CryWall?.setFavs([]); window.CryWall?.onFavsChange?.([]); window.CryWall?.toast(T('Favoriler temizlendi'), '', 'ok'); }

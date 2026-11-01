@@ -123,6 +123,7 @@ function toggleMenu() {
       <div class="acc-menu__head"><b>${esc(name)}</b><span>${esc(user.email || '')}</span>
         ${user.emailVerified || user.providerData.some((p) => p.providerId === 'google.com') ? '' : '<em>E-postanı doğrulamayı unutma</em>'}</div>
       <button data-a="favs">♥ Favorilerim</button>
+      <button data-a="recent">🕘 Son kullanılanlar</button>
       <button data-a="settings">⚙ Ayarlar</button>
       <button data-a="out">Çıkış yap</button>`;
   } else {
@@ -136,6 +137,7 @@ function toggleMenu() {
     const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
     menu.remove(); menu = null;
     if (a === 'favs') $('.tab[data-mode="fav"]')?.click();
+    if (a === 'recent') window.CryWall?.openRecent?.();
     if (a === 'settings') window.CWSettings?.open();
     if (a === 'login' || a === 'signup') openDialog(a);
     if (a === 'out') doSignOut();

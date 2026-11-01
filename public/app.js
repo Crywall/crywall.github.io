@@ -1184,6 +1184,7 @@
     openLive(key) { S.liveCat = key; switchMode("live", false); renderCats(); reset("force"); },
     // favourites, used by account.js to keep them in the user's account
     applyPrefs,
+    openRecent: () => { switchMode('recent'); },
     getFavs: () => favs.slice(),
     favKey,
     setFavs(list) {
