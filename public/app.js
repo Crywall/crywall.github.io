@@ -92,6 +92,7 @@
     $$(`[data-fav="${favKey(it)}"]`).forEach((b) => b.classList.toggle('is-fav', isFav(it)));
     toast(isFav(it) ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı', '', 'ok', 1800);
     if (S.mode === 'fav') renderFavs();
+    window.CryWall?.onFavsChange?.(favs);          // account.js saves them to the user's account
   }
 
   // ---------- api ----------
@@ -598,7 +599,7 @@
     e.hidden = false;
     e.innerHTML = blocked ? '<b>Bu içerik CryWall\'da yok</b>Telif hakkı nedeniyle oyun, film, dizi ve anime karakterlerine ait duvar kağıtlarını yayınlamıyoruz. Doğa, uzay, şehir veya sanat aramayı dene.'
       : msg ? `<b>Bir sorun oluştu</b>${esc(msg)}`
-      : S.mode === 'fav' ? '<b>Henüz favorin yok</b>Beğendiğin duvar kağıtlarındaki ♥ işaretine bas, burada toplansın.'
+      : S.mode === 'fav' ? '<b>Henüz favorin yok</b>Beğendiğin duvar kağıtlarındaki ♥ işaretine bas, burada toplansın.' + (window.CryWallAccount && !window.CryWallAccount.user ? '<br><br><button class="btn btn--primary btn--sm" onclick="CryWallAccount.open(\'signup\')">Giriş yap · favorilerin kaybolmasın</button>' : '')
       : '<b>Sonuç bulunamadı</b>Farklı bir kelime veya daha düşük çözünürlük dene.';
   }
 
@@ -1106,6 +1107,17 @@
     CATS, LIVE_CATS,
     openCat(key) { const c = CATS.find((x) => x.key === key); if (!c) return; S.cat = c; S.q = ""; S.colors = ""; S.title = c.name; switchMode("static", false); renderCats(); reset("force"); },
     openLive(key) { S.liveCat = key; switchMode("live", false); renderCats(); reset("force"); },
+    // favourites, used by account.js to keep them in the user's account
+    getFavs: () => favs.slice(),
+    favKey,
+    setFavs(list) {
+      favs = Array.isArray(list) ? list : [];
+      store.set('crywall.favs', favs);
+      $$('[data-fav]').forEach((b) => b.classList.toggle('is-fav', favs.some((f) => favKey(f) === b.dataset.fav)));
+      if (S.mode === 'fav') renderFavs();
+    },
+    toast,
+    onFavsChange: null,
   };
 
   // ---------- go ----------
