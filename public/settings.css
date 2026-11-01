@@ -151,3 +151,9 @@ body { font-feature-settings: "cv11", "ss01"; }
 .hero2__title em { font-family: 'Plus Jakarta Sans', Inter, sans-serif !important; font-style: normal; font-weight: 300; font-size: 1em;
   letter-spacing: -.035em; color: rgb(var(--accent-rgb)); -webkit-text-fill-color: currentColor; }
 .hero2__title em::after { height: .055em; bottom: -.04em; opacity: .7; }
+
+/* strips: no scaling (pills overlapped their neighbours) — lift + glow instead */
+.mq:hover .mqi, .mq--text:hover .mqt { transform: none; }
+.mq:hover .mqi:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 26px -14px rgb(var(--accent-rgb) / .8); }
+.mq--text .mqt:hover { transform: translateY(-2px); }
+.mqi:hover img { transform: none; }
