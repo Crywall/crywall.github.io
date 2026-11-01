@@ -237,6 +237,28 @@ if (-not $NoBrowser) { Start-Process "http://localhost:$Port/" }
 # site can't change your wallpaper.
 $AllowedOrigins = @('https://vexwalls.github.io', 'https://crywall.github.io', "http://localhost:$Port", "http://127.0.0.1:$Port")
 
+# ---------- automatic wallpaper changer (rotate.ps1) ----------
+$RotDir  = Join-Path $env:APPDATA 'VexWalls'
+$RotCfg  = Join-Path $RotDir 'rotate.json'
+$RotPid  = Join-Path $env:TEMP 'vexwalls_rotate.pid'
+New-Item -ItemType Directory -Force $RotDir | Out-Null
+function Get-RotateCfg {
+    try { return Get-Content $RotCfg -Raw -Encoding UTF8 | ConvertFrom-Json } catch { return [pscustomobject]@{ on = $false; source = 'cat'; cat = 'doga'; every = 1440; favs = @() } }
+}
+function Test-RotateRunning {
+    try { $p = [int](Get-Content $RotPid -Raw); return [bool](Get-Process -Id $p -ErrorAction SilentlyContinue) } catch { return $false }
+}
+function Start-Rotate {
+    if (Test-RotateRunning) { return }
+    $p = Start-Process powershell.exe -WindowStyle Hidden -PassThru -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$(Join-Path $Root 'rotate.ps1')`"")
+    Set-Content $RotPid $p.Id
+}
+function Stop-Rotate {
+    try { Stop-Process -Id ([int](Get-Content $RotPid -Raw)) -Force -ErrorAction SilentlyContinue } catch {}
+    Remove-Item $RotPid -ErrorAction SilentlyContinue
+}
+if ((Get-RotateCfg).on) { Start-Rotate }      # keep rotating after a restart / Windows login
+
 $Mime = @{ '.html' = 'text/html; charset=utf-8'; '.css' = 'text/css; charset=utf-8'; '.js' = 'application/javascript; charset=utf-8'
            '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.ico' = 'image/x-icon'; '.json' = 'application/json'; '.webmanifest' = 'application/manifest+json'; '.webp' = 'image/webp' }
 $WhAllowed = 'q', 'categories', 'sorting', 'order', 'topRange', 'atleast', 'ratios', 'colors', 'page', 'seed'
@@ -265,7 +287,7 @@ while ($listener.IsListening) {
         continue
     }
     # Changing THIS computer (apply / live / folder) is only allowed from this computer itself.
-    $pcOnly = '/api/apply', '/api/save', '/api/open-folder', '/api/live/apply', '/api/live/stop'
+    $pcOnly = '/api/apply', '/api/save', '/api/open-folder', '/api/live/apply', '/api/live/stop', '/api/rotate'
     if ($path -in $pcOnly -and -not $req.IsLocal) {
         try { Send-Json $ctx @{ ok = $false; error = 'pc_only' } 403 } catch {}
         continue
@@ -332,6 +354,26 @@ while ($listener.IsListening) {
             $mon = $req.QueryString['monitor']; if (-not $mon) { $mon = 'all' }
             Stop-Live $mon
             Send-Json $ctx @{ ok = $true }
+        }
+        elseif ($path -eq '/api/rotate' -and $req.HttpMethod -eq 'GET') {
+            $c = Get-RotateCfg
+            Send-Json $ctx @{ ok = $true; on = [bool]$c.on; source = [string]$c.source; cat = [string]$c.cat; every = [int]$c.every; favCount = @($c.favs | Where-Object { $_ -is [string] }).Count; running = (Test-RotateRunning) }
+        }
+        elseif ($path -eq '/api/rotate' -and $req.HttpMethod -eq 'POST') {
+            $b = Read-Body $ctx
+            $old = Get-RotateCfg
+            $favs = if ($null -ne $b.favs) { @($b.favs | Where-Object { $_ -match '^https://w\.wallhaven\.cc/full/[a-z0-9]{2}/wallhaven-[a-z0-9]+\.(jpg|png)$' } | Select-Object -First 500) } else { @($old.favs | Where-Object { $_ -is [string] -and $_ -match "^https://" }) }
+            $cfg = [ordered]@{
+                on     = [bool]$(if ($null -ne $b.on) { $b.on } else { $old.on })
+                source = $(if ($b.source -in 'favs', 'cat') { $b.source } else { $old.source })
+                cat    = $(if ([string]$b.cat -match '^[a-z]{2,20}$') { $b.cat } else { $old.cat })
+                every  = [int]$(if ($b.every) { [Math]::Max(15, [int]$b.every) } else { $old.every })
+                favs   = @($favs | Where-Object { $_ })
+                nudge  = (Get-Date).Ticks            # any save (incl. "change now") makes the changer act at once
+            }
+            [IO.File]::WriteAllText($RotCfg, ($cfg | ConvertTo-Json -Depth 3), (New-Object Text.UTF8Encoding $false))
+            if ($cfg.on) { Start-Rotate } else { Stop-Rotate }
+            Send-Json $ctx @{ ok = $true; on = $cfg.on }
         }
         elseif ($path -eq '/api/status') {
             $lives = @(Get-LiveStates | ForEach-Object { @{ id = $_.id; title = $_.title; monitor = [string]$_.monitor } })

@@ -70,11 +70,21 @@ async function pullAndMerge(u) {
     cw().setFavs?.(merged);
     if (merged.length !== remote.length) await save(u, merged);
     if (local.length && merged.length > remote.length) toast('Favoriler hesabına eklendi', `${merged.length} favori artık her cihazında.`, 'ok', 3500);
+    // recently used: newest first, merged the same way (max 40)
+    const rRemote = (snap.exists() && Array.isArray(snap.data().recent)) ? snap.data().recent : [];
+    const rLocal = cw().getRecent?.() || [];
+    const rSeen = new Set(), rMerged = [];
+    for (const f of [...rLocal, ...rRemote]) { const k = key(f); if (!rSeen.has(k)) { rSeen.add(k); rMerged.push(f); } }
+    cw().setRecent?.(rMerged.slice(0, 40));
+    if (rMerged.length !== rRemote.length) await saveRecent(u, rMerged.slice(0, 40));
   } catch (e) { console.warn('[account] sync', e); }
   syncing = false;
 }
 async function save(u, favs) {
   await setDoc(userDoc(u), { favs, email: u.email || null, updatedAt: serverTimestamp() }, { merge: true });
+}
+async function saveRecent(u, recent) {
+  await setDoc(userDoc(u), { recent, updatedAt: serverTimestamp() }, { merge: true });
 }
 function hookFavs() {
   if (!window.CryWall) return setTimeout(hookFavs, 200);
@@ -82,6 +92,12 @@ function hookFavs() {
     if (!user || syncing) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => save(user, favs).catch((e) => console.warn('[account] save', e)), 600);
+  };
+  let recentTimer = 0;
+  window.CryWall.onRecentChange = (recent) => {
+    if (!user || syncing) return;
+    clearTimeout(recentTimer);
+    recentTimer = setTimeout(() => saveRecent(user, recent).catch((e) => console.warn('[account] recent', e)), 800);
   };
 }
 hookFavs();

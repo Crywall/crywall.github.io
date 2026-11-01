@@ -51,6 +51,7 @@
       <div class="st-row st-row--col"><span>${T('En düşük çözünürlük')}</span>${seg('res', prefs.res, [['', 'Otomatik'], ['1920x1080', 'Full HD'], ['2560x1440', '2K'], ['3840x2160', '4K']])}</div>
       <div class="st-row"><span>${T('Ana sayfa slaytı kendiliğinden geçsin')}</span>${sw('autoplay', prefs.autoplay)}</div>
       <div class="st-row"><span>${T('Animasyonları azalt')}</span>${sw('calm', prefs.calm)}</div>
+      <div id="stRotate"></div>
 
       ${user ? `<h4>${T('Hesap')}</h4>
         <button class="st-item" data-act="logout">${T('Çıkış yap')}</button>
@@ -70,8 +71,40 @@
         <button class="st-link" data-act="privacy">${T('Gizlilik')}</button>
         <button class="st-link" data-act="copyright">${T('Telif')}</button>
       </div>`;
+    renderRotate();
   }
 
+
+  // ---------- automatic wallpaper changing (PC helper) ----------
+  async function renderRotate() {
+    const box = panel?.querySelector('#stRotate'); if (!box) return;
+    const base = window.CryWall?.helperBase?.();
+    if (base == null) { box.innerHTML = ''; return; }
+    let c;
+    try { c = await fetch(base + '/api/rotate').then((r) => r.json()); } catch { box.innerHTML = ''; return; }
+    if (!c || !c.ok) { box.innerHTML = ''; return; }
+    const cats = (window.CryWall?.CATS || []).filter((x) => x.key !== 'kesfet');
+    box.innerHTML = `
+      <h4>${T('Otomatik değiştir')}</h4>
+      <div class="st-row"><span>${T('Duvar kağıdını kendiliğinden değiştir')}</span>${sw('rot-on', c.on)}</div>
+      <div class="st-rot ${c.on ? '' : 'is-off'}">
+        <div class="st-row st-row--col"><span>${T('Nereden')}</span>${seg('rot-source', c.source, [['cat', 'Kategori'], ['favs', 'Favorilerim']])}</div>
+        ${c.source === 'cat' ? `<div class="st-row"><span>${T('Kategori')}</span><select class="st-select" data-rotcat>${cats.map((x) => `<option value="${x.key}" ${x.key === c.cat ? 'selected' : ''}>${T(x.name)}</option>`).join('')}</select></div>` : ''}
+        <div class="st-row st-row--col"><span>${T('Ne sıklıkla')}</span>${seg('rot-every', c.every, [['60', 'Saatte bir'], ['180', '3 saatte bir'], ['1440', 'Günde bir']])}</div>
+        <button class="st-item" data-act="rot-now">⟳ ${T('Şimdi değiştir')}</button>
+        <p class="st-note">${T('Bilgisayar açıkken çalışır. Wallpaper Engine açıksa değişiklik onun arkasında kalır.')}</p>
+      </div>`;
+  }
+  async function saveRotate(patch) {
+    const base = window.CryWall?.helperBase?.(); if (base == null) return;
+    const favs = (window.CryWall?.getFavs?.() || []).filter((f) => f.kind === 'img' && f.full).map((f) => f.full);
+    try {
+      await fetch(base + '/api/rotate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...patch, favs }) });
+      if (patch.on === true || patch.now) window.CryWall?.toast(T('Duvar kağıdı değişiyor…'), T('Birkaç saniye içinde masaüstünde.'), 'ok', 3000);
+      if (patch.source === 'favs' && !favs.length) window.CryWall?.toast(T('Favorin yok'), T('Önce birkaç duvar kağıdını ♥ ile favorilere ekle.'), 'err', 5000);
+    } catch { window.CryWall?.toast(T('Kaydedilemedi'), T('Bilgisayar yardımcısına ulaşılamadı.'), 'err'); }
+    renderRotate();
+  }
   function open() {
     close();
     panel = document.createElement('div');
@@ -83,14 +116,27 @@
       </aside>`;
     document.body.append(panel);
     render();
+    renderRotate();
     requestAnimationFrame(() => panel.classList.add('show'));
     panel.addEventListener('click', onClick);
-    panel.addEventListener('change', (e) => { const s = e.target.closest('[data-lang]'); if (s) { prefs.lang = s.value; save(); location.reload(); } });
+    panel.addEventListener('change', (e) => {
+      const s = e.target.closest('[data-lang]'); if (s) { prefs.lang = s.value; save(); location.reload(); }
+      const rc = e.target.closest('[data-rotcat]'); if (rc) saveRotate({ cat: rc.value });
+    });
   }
   function close() { if (!panel) return; const p = panel; panel = null; p.classList.remove('show'); setTimeout(() => p.remove(), 250); }
 
   async function onClick(e) {
     if (e.target.closest('[data-x]')) return close();
+    // automatic wallpaper changing controls
+    const rseg = e.target.closest('.st-seg [data-v]');
+    if (rseg && rseg.parentElement.dataset.k.startsWith('rot-')) {
+      const k = rseg.parentElement.dataset.k.slice(4);
+      return saveRotate({ [k]: k === 'every' ? +rseg.dataset.v : rseg.dataset.v });
+    }
+    const rsw = e.target.closest('[data-sw="rot-on"]');
+    if (rsw) return saveRotate({ on: !rsw.classList.contains('is-on') });
+    if (e.target.closest('[data-act="rot-now"]')) return saveRotate({ now: true });
     const segBtn = e.target.closest('.st-seg [data-v]');
     if (segBtn) {
       const k = segBtn.parentElement.dataset.k, v = segBtn.dataset.v;

@@ -203,3 +203,14 @@ body { font-feature-settings: "cv11", "ss01"; }
 [data-mode="light"] .nav.is-solid .tab.is-active, [data-mode="light"] .seg button.is-active { color: #0f1724; }
 [data-mode="light"] .nav.is-solid .iconbtn, [data-mode="light"] .nav.is-solid .pwa-navbtn { background: #f4f6fa; border-color: var(--line-2); color: #0f1724; }
 [data-mode="light"] .nav.is-solid .acc-btn { color: #0f1724; }
+
+/* "fits your screen" badge + similar wallpapers in the viewer */
+.tagcat--fit { background: rgba(52,211,153,.9) !important; color: #04261a !important; border-color: transparent; }
+.similar__title { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.similar__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.similar__grid button { padding: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 10; background: var(--card); transition: border-color .15s, transform .15s; }
+.similar__grid button:hover { border-color: var(--accent); transform: translateY(-2px); }
+.similar__grid img { width: 100%; height: 100%; object-fit: cover; }
+
+.st-rot.is-off { opacity: .45; pointer-events: none; }
+.st-note { margin: 6px 0 0; font-size: 12px; color: var(--dim); line-height: 1.45; }

@@ -58,6 +58,7 @@
     down: '<svg viewBox="0 0 24 24"><path d="M11 3h2v10.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4 3.6 3.6V3ZM4 19h16v2H4v-2Z"/></svg>',
     play: '<svg viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>',
     stop: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+    share: '<svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7a3 3 0 0 0 .1.8L8.4 11.2a3 3 0 1 0 0 1.6l6.7 3.4A3 3 0 1 0 18 16Z"/></svg>',
   };
 
   // ---------- state ----------
@@ -264,6 +265,65 @@
     }
   }
   const SAVE_LABEL = IS_PHONE ? 'Telefona kaydet' : 'İndir';
+  // ---------- share links ----------
+  // vexwalls.github.io/?w=<id> opens that wallpaper, ?v=<id> that live wallpaper.
+  const SITE_URL = 'https://vexwalls.github.io/';
+  const shareUrl = (it) => SITE_URL + (it.kind === 'live' ? '?v=' : '?w=') + encodeURIComponent(it.id);
+  async function shareIt(it) {
+    const url = shareUrl(it);
+    const title = 'VexWalls — ' + (it.catName || (it.kind === 'live' ? 'Hareketli duvar kağıdı' : 'Duvar kağıdı'));
+    if (navigator.share && IS_PHONE) { try { await navigator.share({ title, url }); return; } catch {} }
+    try { await navigator.clipboard.writeText(url); toast('Bağlantı kopyalandı', url, 'ok', 3500); }
+    catch { window.prompt('Bağlantıyı kopyala:', url); }
+  }
+  async function openShared() {
+    const q = new URLSearchParams(location.search);
+    const w = q.get('w'), v = q.get('v');
+    if (!w && !v) return;
+    let found = null;
+    try {
+      if (w && CATALOG) {
+        for (const c of CATS) { if (c.key === 'kesfet') continue; found = (await getCat(c)).find((x) => x.id === w); if (found) break; }
+      } else if (w) {
+        const r = await fetch(API + '/api/w/' + encodeURIComponent(w)).then((x) => x.json());
+        if (r.data) found = toImg(r.data);
+      }
+      if (v && CATALOG) {
+        for (const [k, n] of LIVE_CATS) { const x = (await liveCatalog(k)).find((y) => y.id === v); if (x) { found = { kind: 'live', ...x, cat: k, catName: n }; break; } }
+      }
+    } catch {}
+    if (found) openViewer(0, [found]);
+    else toast('Bu duvar kağıdı artık listede yok', 'Kaynağından kaldırılmış ya da katalog yenilenmiş olabilir.', 'err', 5000);
+  }
+
+  // ---------- "fits your screen" ----------
+  const SCR = (() => {
+    const d = window.devicePixelRatio || 1, a = Math.round(screen.width * d), b = Math.round(screen.height * d);
+    return IS_PHONE ? { w: Math.min(a, b), h: Math.max(a, b) } : { w: Math.max(a, b), h: Math.min(a, b) };
+  })();
+  const fitsScreen = (it) => it.kind === 'img' && it.w >= SCR.w * 0.98 && it.h >= SCR.h * 0.98 && Math.abs(it.w / it.h - SCR.w / SCR.h) < 0.12;
+
+  // ---------- similar wallpapers (same category, shared colours, same shape) ----------
+  async function similarOf(it) {
+    if (!CATALOG || it.kind !== 'img') return [];
+    const c = CATS.find((x) => x.key === it.catKey); if (!c) return [];
+    const list = await getCat(c);
+    const cols = new Set((it.colors || []).map((x) => x.toLowerCase()));
+    const portrait = it.ratio < 1;
+    return list.filter((x) => x.id !== it.id && (x.ratio < 1) === portrait)
+      .map((x) => ({ x, s: (x.colors || []).filter((k) => cols.has(k.toLowerCase())).length + Math.random() * 0.5 }))
+      .sort((a, b) => b.s - a.s).slice(0, 8).map((o) => o.x);
+  }
+  async function renderSimilar(it) {
+    const box = $('#vSimilar'); if (!box) return;
+    box.innerHTML = '';
+    const list = await similarOf(it);
+    if (cur !== it || !list.length) return;
+    box.innerHTML = `<p class="similar__title">Benzerleri</p><div class="similar__grid">${list.map((x, i) =>
+      `<button data-i="${i}" title="${esc(x.res)}"><img src="${esc(thumbOf(x))}" alt="" loading="lazy"></button>`).join('')}</div>`;
+    box.onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) openViewer(+b.dataset.i, list, 1); };
+  }
+
   const videoUrl = (it) => {
     const [src, n] = String(it.id).split('-');
     return src === 'mb' ? `https://motionbgs.com/dl/hd/${n}/` : `https://assets.mixkit.co/videos/${n}/${n}-1080.mp4`;
@@ -629,7 +689,7 @@
         <div class="card__ph" style="background:${esc(bg)}"></div>
         <img src="${esc(thumbOf(it))}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy" decoding="async">
         <div class="card__tags">
-          ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}
+          ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}${fitsScreen(it) ? '<span class="tagcat tagcat--fit" title="Ekranının çözünürlüğüne ve oranına birebir uyar">✓ Tam uyar</span>' : ''}
           <div class="card__moods">${moodHtml(it)}</div>
         </div>
         <div class="card__overlay">
@@ -677,6 +737,7 @@
     if (!it) return;
     recent = [it, ...recent.filter((f) => favKey(f) !== favKey(it))].slice(0, 40);
     store.set('crywall.recent', recent);
+    window.CryWall?.onRecentChange?.(recent);      // account.js keeps it in the user's account
   }
   function renderRecent() {
     grid.innerHTML = '';
@@ -767,6 +828,7 @@
     renderActions(cur);
     $('#vTags').innerHTML = '';
     if (cur.kind === 'img') loadTags(cur);
+    renderSimilar(cur);
     const src = $('#vSource');
     src.href = cur.page || 'https://mixkit.co/free-stock-video/';
     src.textContent = cur.kind === 'img' ? 'Wallhaven\'da görüntüle ↗' : `${cur.source || 'Mixkit'} sayfasında görüntüle ↗`;
@@ -779,17 +841,18 @@
   function renderActions(it) {
     const a = $('#vActions');
     const fav = `<button class="btn${isFav(it) ? ' is-fav' : ''}" data-act="fav">${ICON.heart}${isFav(it) ? 'Favorilerde' : 'Favorilere ekle'}</button>`;
+    const share = `<button class="btn" data-act="share">${ICON.share}Paylaş</button>`;
     if (PHONE_MODE) {
       // phones: a website can't set the wallpaper itself, so save it and show how
       a.innerHTML = it.kind === 'img' ? `
         <button class="btn btn--primary" data-act="phone">${ICON.down}${SAVE_LABEL}</button>
-        <div class="row">${fav}</div>
+        <div class="row">${fav}${share}</div>
         <p class="note">${IS_PHONE ? '' : '<b>Windows:</b> İndir › resme sağ tıkla › "Masaüstü arka planı olarak ayarla".<br><b>Telefonda:</b> '}<b>Duvar kağıdı yapmak için:</b><br>
           <b>iPhone:</b> Kaydet › "Görüntüyü Kaydet" › Fotoğraflar'da aç › Paylaş › "Duvar Kağıdı olarak kullan".<br>
           <b>Android:</b> Kaydet › Galeri'de aç › ⋮ › "Duvar kağıdı olarak ayarla" (ana ekran / kilit ekranı).</p>`
         : `
         <a class="btn btn--primary" href="${esc(videoUrl(it))}" target="_blank" rel="noopener">${ICON.down}Videoyu indir</a>
-        <div class="row">${fav}</div>
+        <div class="row">${fav}${share}</div>
         <p class="note">Hareketli duvar kağıdı için: <b>Android</b>'de "Video Live Wallpaper" gibi bir uygulamayla bu videoyu seçebilirsin. <b>iPhone</b> video duvar kağıdını desteklemiyor; "Canlı Fotoğraf"a çeviren bir uygulama gerekir.</p>`;
       if (!IS_PHONE && IS_REMOTE) {
         // desktop visitor on the website: offer the one-click Apply via the PC helper
@@ -804,6 +867,7 @@
         const b = e.target.closest('[data-act]'); if (!b) return;
         if (b.dataset.act === 'fav') { toggleFav(it); renderActions(it); }
         else if (b.dataset.act === 'phone') savePhone(it);
+        else if (b.dataset.act === 'share') shareIt(it);
         else if (b.dataset.act === 'connect') connectHelper();
       };
       return;
@@ -816,6 +880,7 @@
           <button class="btn" data-act="both">${ICON.both}İkisine birden</button>
         </div>
         <div class="row"><button class="btn" data-act="save">${ICON.down}İndir</button>${fav}</div>
+        ${share}
         <p class="note">Görsel orijinal kalitede indirilir ve ekranını dolduracak şekilde ayarlanır.</p>`;
     } else {
       if (S.mon === 'span') S.mon = 'all';
@@ -824,7 +889,7 @@
       a.innerHTML = monitorPicker('live') + `
         ${here ? `<button class="btn" data-act="stop" data-stop="${esc(here.monitor)}">${ICON.stop}Bu ekranda durdur</button>`
                : `<button class="btn btn--primary" data-act="live">${ICON.play}Hareketli olarak uygula</button>`}
-        <div class="row">${fav}${S.lives.length && !here ? `<button class="btn" data-act="stop" data-stop="all">${ICON.stop}Tümünü durdur</button>` : ''}</div>
+        <div class="row">${fav}${share}${S.lives.length && !here ? `<button class="btn" data-act="stop" data-stop="all">${ICON.stop}Tümünü durdur</button>` : ''}</div>
         <p class="note">Video, masaüstü simgelerinin arkasında sessiz ve sonsuz döngüde oynar.${multi() ? ' Her ekrana ayrı video koyabilirsin.' : ''} Bilgisayar yeniden başlatılınca normal duvar kağıdına döner.</p>`;
     }
     a.onclick = (e) => {
@@ -835,6 +900,7 @@
       const act = b.dataset.act;
       if (act === 'fav') { toggleFav(it); renderActions(it); }
       else if (act === 'save') saveImg(it);
+      else if (act === 'share') shareIt(it);
       else if (act === 'live') applyLive(it);
       else if (act === 'stop') stopLive();
       else applyImg(it, act);
@@ -1184,8 +1250,13 @@
     openLive(key) { S.liveCat = key; switchMode("live", false); renderCats(); reset("force"); },
     // favourites, used by account.js to keep them in the user's account
     applyPrefs,
+    // where the PC helper can be reached: '' = this server (PC version), URL = helper from the website, null = none
+    helperBase: () => (!IS_REMOTE ? '' : (API || null)),
     openRecent: () => { switchMode('recent'); },
     getFavs: () => favs.slice(),
+    getRecent: () => recent.slice(),
+    setRecent(list) { recent = Array.isArray(list) ? list.slice(0, 40) : []; store.set('crywall.recent', recent); if (S.mode === 'recent') renderRecent(); },
+    onRecentChange: null,
     favKey,
     setFavs(list) {
       favs = Array.isArray(list) ? list : [];
@@ -1209,6 +1280,7 @@
     switchMode('static', false);
     reset();
     // (hero already started above)
+    openShared();               // ?w=<id> / ?v=<id> share links
     status();
   })();
 })();
