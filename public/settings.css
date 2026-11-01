@@ -197,3 +197,9 @@ body { font-feature-settings: "cv11", "ss01"; }
 [data-mode="light"] .mqt { color: #eef2f7; -webkit-text-fill-color: #eef2f7; -webkit-text-stroke: 2px rgba(15,23,36,.4); }
 [data-mode="light"] .mqt:hover { -webkit-text-fill-color: var(--accent); -webkit-text-stroke-color: var(--accent); }
 .mqt small { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+
+/* light theme: menu bar after scrolling (white bar) needs dark text */
+[data-mode="light"] .nav.is-solid .tab { color: #556072; }
+[data-mode="light"] .nav.is-solid .tab.is-active, [data-mode="light"] .seg button.is-active { color: #0f1724; }
+[data-mode="light"] .nav.is-solid .iconbtn, [data-mode="light"] .nav.is-solid .pwa-navbtn { background: #f4f6fa; border-color: var(--line-2); color: #0f1724; }
+[data-mode="light"] .nav.is-solid .acc-btn { color: #0f1724; }
