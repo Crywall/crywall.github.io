@@ -143,3 +143,21 @@
   addEventListener('scroll', upd, { passive: true }); upd();
   b.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
 })();
+
+// ---------- privacy note (shown once) + privacy dialog ----------
+(() => {
+  const dlg = document.getElementById('privacy');
+  document.getElementById('openPrivacy')?.addEventListener('click', () => dlg?.showModal());
+  let seen = false; try { seen = localStorage.getItem('crywall.privacy') === '1'; } catch {}
+  if (seen) return;
+  const n = document.createElement('div');
+  n.className = 'cookie';
+  n.innerHTML = `<div><b>🍪 Çerez yok, takip yok.</b><span>CryWall sadece favorilerini ve tercihlerini senin cihazında saklar. <a href="#" data-more>Ayrıntılar</a></span></div>
+    <button class="btn btn--primary btn--sm" data-ok>Tamam</button>`;
+  n.addEventListener('click', (e) => {
+    if (e.target.closest('[data-more]')) { e.preventDefault(); dlg?.showModal(); }
+    if (e.target.closest('[data-ok]')) { try { localStorage.setItem('crywall.privacy', '1'); } catch {} n.classList.remove('show'); setTimeout(() => n.remove(), 400); }
+  });
+  document.body.append(n);
+  setTimeout(() => n.classList.add('show'), 900);
+})();

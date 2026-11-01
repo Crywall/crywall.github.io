@@ -287,3 +287,25 @@ html, body { overflow-x: clip; }
   box-shadow: 0 14px 34px -14px rgb(var(--accent-rgb) / .6); transition: opacity .4s, transform .5s var(--ease); pointer-events: none; white-space: nowrap; }
 .ver-note.show { opacity: 1; transform: translate(-50%, 0); }
 @media (max-width: 720px) { .ver { font-size: 9.5px; padding: 1px 5px; } }
+
+/* ---------- smoother everywhere (user: the site felt laggy) ---------- */
+#cursor { display: none !important; }                 /* follower ring removed */
+body::before { display: none; }                         /* film grain layer */
+.hslide .hslide__img, .hslide.is-active .hslide__img, .hslide.leave-right .hslide__img, .hslide.leave-left .hslide__img { animation: heroImgIn 1s ease both; }
+.hslide .hslide__ph, .hslide.is-active .hslide__ph, .hslide.leave-right .hslide__ph, .hslide.leave-left .hslide__ph { animation: none; }
+.hslide { will-change: auto; }
+.hslide.is-active, .hslide.leave-left, .hslide.leave-right { will-change: transform; }
+
+/* footer legal line + one-time privacy note */
+.footer__legal { max-width: 1520px; margin: 0 auto; padding: 0 28px 26px; color: var(--dim); font-size: 12.5px; }
+.cookie { position: fixed; left: 16px; bottom: 16px; z-index: 255; max-width: 430px; display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 16px;
+  border-radius: 16px; background: rgba(11,15,21,.96); border: 1px solid var(--line-2); box-shadow: 0 20px 50px -20px rgba(0,0,0,.9);
+  transform: translateY(140%); transition: transform .6s var(--ease); }
+.cookie.show { transform: none; }
+.cookie div { display: grid; gap: 2px; font-size: 13px; }
+.cookie span { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.cookie a { color: var(--accent); }
+.cookie .btn { flex: none; }
+@media (max-width: 720px) { .cookie { left: 10px; right: 10px; bottom: 10px; max-width: none; } .footer__legal { padding: 0 16px 90px; } }
+.phone-mode .pwa-banner.show ~ .cookie.show, .cookie.show ~ .pwa-banner.show { bottom: 96px; }
+@media (max-width: 720px) { .cookie { top: 64px; bottom: auto; transform: translateY(-160%); } .cookie.show { transform: none; } }

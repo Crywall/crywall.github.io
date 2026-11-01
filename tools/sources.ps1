@@ -9,6 +9,21 @@
 # Wallhaven: excluded from every search.
 $WhExclude = ' -"video games" -"video game characters" -"video game art" -"anime girls" -"anime boys" -"Cyberpunk 2077" -Marvel -"DC Comics" -"Star Wars" -Pokemon -celebrity'
 
+# Women / girls are kept out of every category except "Anime Karakter" (user request:
+# people who want them find them there). That category only takes ORIGINAL characters.
+$GirlExclude = ' -women -"women outdoors" -model -girl -brunette -blonde -redhead -"long hair" -"short hair" -"looking at viewer" -bikini -"anime girl"'
+$CharacterQuery = '+"original characters" +"anime girls"'
+# Warrior / knight / samurai art often comes from big game & film series: keep those out too,
+# so the character categories only show ORIGINAL (fan-free, studio-free) designs.
+$FranchiseMore = ' -"God of War" -"Assassin''s Creed" -Destiny -Overwatch -"League of Legends" -"World of Warcraft" -Diablo -Skyrim -"The Elder Scrolls" -"Final Fantasy" -"For Honor" -"Ghost of Tsushima" -Sekiro -Bloodborne -"Dark Souls" -"Elden Ring" -"The Witcher" -Warhammer -Halo -"The Lord of the Rings" -"Game of Thrones" -Batman -"Spider-Man" -"Mortal Kombat" -"Monster Hunter"'
+# Builds the exclusion part of a Wallhaven query for a search text.
+function Get-WhFilter([string]$q) {
+    if ($q -like '*original characters*') { return ($WhExclude -replace ' -"anime girls"', '') + $FranchiseMore }
+    return $WhExclude + $GirlExclude + $FranchiseMore
+}
+# Live wallpaper titles about girls/women stay out of the (scenery) live categories.
+$GirlTitle = [regex]::new('(?i)\b(girl|girls|woman|women|lady|waifu|maid|princess|goddess|she|her)\b')
+
 # MotionBGs: only these generic tags are used (no franchise tags).
 $MbTags = @('anime-nature', 'japan', 'torii', 'samurai', 'fantasy', 'dragon', 'knight', 'space', 'astronaut', 'black-hole',
     'rain', 'night', 'sunset', 'forest', 'winter', 'snow', 'water', 'mountain', 'autumn-leaves', 'landscape', 'nature',
@@ -51,6 +66,7 @@ function Get-LiveList([string]$cat, [int]$page) {
             $n = $m.Groups[3].Value; $slug = $m.Groups[2].Value; $res = $m.Groups[4].Value
             if ($seen[$n]) { continue }; $seen[$n] = 1
             if ((Test-Blocked $m.Groups[1].Value) -or (Test-Blocked ($slug -replace '-', ' '))) { continue }
+            if ($GirlTitle.IsMatch($m.Groups[1].Value)) { continue }
             $items += @{
                 id      = "mb-$n"
                 title   = [Net.WebUtility]::HtmlDecode($m.Groups[1].Value)

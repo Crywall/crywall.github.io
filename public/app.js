@@ -4,23 +4,38 @@
 
   // ---------- data ----------
   // Only generic (non-franchise) categories: the site is meant to be published.
+  // "+tag" = the wallpaper must carry that tag (keeps categories accurate). Same list as
+  // tools/build-catalog.ps1. Women/girls only appear in "Anime Karakter" (original characters).
   const CATS = [
-    { key: 'kesfet',    name: 'Keşfet',        q: '',            c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqg6r7.jpg' },
-    { key: 'doga',      name: 'Doğa',          q: 'nature',      c: '100', img: 'https://th.wallhaven.cc/lg/k8/k81776.jpg' },
-    { key: 'manzara',   name: 'Manzara',       q: 'landscape',   c: '100', img: 'https://th.wallhaven.cc/lg/3q/3qqdg6.jpg' },
-    { key: 'anime',     name: 'Anime Manzara', q: 'sky',         c: '010', img: 'https://th.wallhaven.cc/lg/yq/yqe81l.jpg' },
-    { key: 'japonya',   name: 'Japonya',       q: 'Japan',       c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqv2wx.jpg' },
-    { key: 'uzay',      name: 'Uzay',          q: 'space',       c: '100', img: 'https://th.wallhaven.cc/lg/vp/vpyekp.jpg' },
-    { key: 'siberpunk', name: 'Siberpunk',     q: 'cyberpunk',   c: '100', img: 'https://th.wallhaven.cc/lg/je/jel1jq.jpg' },
-    { key: 'fantastik', name: 'Fantastik',     q: 'fantasy art', c: '100', img: 'https://th.wallhaven.cc/lg/k8/k881zd.jpg' },
-    { key: 'dijital',   name: 'Dijital Sanat', q: 'digital art', c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqxzqx.jpg' },
-    { key: 'araba',     name: 'Arabalar',      q: 'cars',        c: '100', img: 'https://th.wallhaven.cc/lg/qr/qrgl87.jpg' },
-    { key: 'sehir',     name: 'Şehir',         q: 'city',        c: '100', img: 'https://th.wallhaven.cc/lg/ly/lydkg2.jpg' },
-    { key: 'hayvan',    name: 'Hayvanlar',     q: 'animals',     c: '100', img: 'https://th.wallhaven.cc/lg/ly/lywpjl.jpg' },
-    { key: 'minimal',   name: 'Minimal',       q: 'minimalism',  c: '100', img: 'https://th.wallhaven.cc/lg/zp/zpq1dg.jpg' },
-    { key: 'soyut',     name: 'Soyut',         q: 'abstract',    c: '100', img: 'https://th.wallhaven.cc/lg/w5/w5m6yr.jpg' },
-    { key: 'karanlik',  name: 'Karanlık',      q: 'dark',        c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqqvv7.jpg' },
+    { key: 'kesfet',    name: 'Keşfet',          q: '',                  c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqg6r7.jpg' },
+    { key: 'doga',      name: 'Doğa',            q: '+nature',           c: '100', img: 'https://th.wallhaven.cc/lg/k8/k81776.jpg' },
+    { key: 'manzara',   name: 'Manzara',         q: '+landscape',        c: '100', img: 'https://th.wallhaven.cc/lg/qr/qrjmgl.jpg' },
+    { key: 'dag',       name: 'Dağ',             q: '+mountains',        c: '100', img: 'https://th.wallhaven.cc/lg/3q/3qqdg6.jpg' },
+    { key: 'deniz',     name: 'Deniz',           q: '+sea',              c: '100', img: 'https://th.wallhaven.cc/lg/zp/zpoxyj.jpg' },
+    { key: 'orman',     name: 'Orman',           q: '+forest',           c: '100', img: 'https://th.wallhaven.cc/lg/gw/gwm2z3.jpg' },
+    { key: 'anime',     name: 'Anime Manzara',   q: '+landscape',        c: '010', img: 'https://th.wallhaven.cc/lg/yq/yqe81l.jpg' },
+    { key: 'karakter',  name: 'Anime Karakter',  q: '+"original characters" +"anime girls"', c: '010', img: 'https://th.wallhaven.cc/lg/3q/3q6m6y.jpg' },
+    { key: 'savasci',   name: 'Savaşçılar',      q: '+warrior',          c: '100', img: 'https://th.wallhaven.cc/lg/ne/ne78w4.jpg' },
+    { key: 'sovalye',   name: 'Şövalyeler',      q: '+knight',           c: '100', img: 'https://th.wallhaven.cc/lg/kx/kx9pg7.jpg' },
+    { key: 'samuray',   name: 'Samuray',         q: '+samurai',          c: '100', img: 'https://th.wallhaven.cc/lg/l3/l3zyg2.jpg' },
+    { key: 'japonya',   name: 'Japonya',         q: '+Japan',            c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqv2wx.jpg' },
+    { key: 'uzay',      name: 'Uzay',            q: '+space',            c: '100', img: 'https://th.wallhaven.cc/lg/vp/vpyekp.jpg' },
+    { key: 'siberpunk', name: 'Siberpunk',       q: '+cyberpunk',        c: '100', img: 'https://th.wallhaven.cc/lg/je/jel1jq.jpg' },
+    { key: 'fantastik', name: 'Fantastik',       q: '+"fantasy art"',    c: '100', img: 'https://th.wallhaven.cc/lg/k8/k881zd.jpg' },
+    { key: 'dijital',   name: 'Dijital Sanat',   q: '+"digital art"',    c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqxzqx.jpg' },
+    { key: 'araba',     name: 'Arabalar',        q: '+cars',             c: '100', img: 'https://th.wallhaven.cc/lg/qr/qrgl87.jpg' },
+    { key: 'sehir',     name: 'Şehir',           q: '+city',             c: '100', img: 'https://th.wallhaven.cc/lg/ly/lydkg2.jpg' },
+    { key: 'hayvan',    name: 'Hayvanlar',       q: '+animals',          c: '100', img: 'https://th.wallhaven.cc/lg/ly/lywpjl.jpg' },
+    { key: 'minimal',   name: 'Minimal',         q: '+minimalism',       c: '100', img: 'https://th.wallhaven.cc/lg/zp/zpq1dg.jpg' },
+    { key: 'soyut',     name: 'Soyut',           q: '+abstract',         c: '100', img: 'https://th.wallhaven.cc/lg/w5/w5m6yr.jpg' },
+    { key: 'karanlik',  name: 'Karanlık',        q: '+dark',             c: '100', img: 'https://th.wallhaven.cc/lg/yq/yqqvv7.jpg' },
   ];
+  // Mixed views (Keşfet, home slideshow) show only a little of these "people" categories.
+  const RARE_CATS = new Set(['karakter']);
+  const mixPool = () => {
+    const base = CATS.filter((c) => c.key !== 'kesfet' && !RARE_CATS.has(c.key));
+    return Math.random() < 0.3 ? base.concat(CATS.filter((c) => RARE_CATS.has(c.key))) : base;
+  };
   // [key, name, group]  key = "<source>:<category>"  (mb = MotionBGs, mx = Mixkit). Generic tags only.
   const LIVE_CATS = [
     ['mb:anime-nature', 'Anime Manzara', 'Çizim & Sanat'], ['mb:japan', 'Japonya', 'Çizim & Sanat'], ['mb:samurai', 'Samuray', 'Çizim & Sanat'],
@@ -112,7 +127,7 @@
     Fütüristik: '#8fd3ff', Güçlü: '#ff9a7a', Büyülü: '#d7b6ff', Canlı: '#ffd36b',
   };
   const CAT_MOOD = {
-    doga: 'Huzurlu', manzara: 'Ferah', anime: 'Hayalperest', japonya: 'Zen', uzay: 'Gizemli', siberpunk: 'Neon', fantastik: 'Epik',
+    doga: 'Huzurlu', manzara: 'Ferah', dag: 'Ferah', deniz: 'Rahatlatıcı', orman: 'Huzurlu', karakter: 'Hayalperest', savasci: 'Epik', sovalye: 'Epik', samuray: 'Güçlü', anime: 'Hayalperest', japonya: 'Zen', uzay: 'Gizemli', siberpunk: 'Neon', fantastik: 'Epik',
     dijital: 'Yaratıcı', araba: 'Hızlı', sehir: 'Modern', hayvan: 'Sevimli', minimal: 'Sade', soyut: 'Sanatsal', karanlik: 'Gizemli',
   };
   const LIVE_MOOD = {
@@ -191,22 +206,33 @@
   // Browsers (Edge/Chrome "local network access") ask the user before a website may talk to
   // localhost. We never trigger that question on page load — only when the user presses
   // "Bu bilgisayara bağlan". Once allowed, the browser remembers it and we connect silently.
+  // The permission has had different names across browser versions; if ANY of them is
+  // granted we may connect. (Checking only the first name made users press "bağlan" every visit.)
   async function lnaState() {
-    for (const name of ['local-network-access', 'loopback-network']) {
-      try { return (await navigator.permissions.query({ name })).state; } catch {}
+    let state = 'unsupported';                 // older browser: no permission needed
+    for (const name of ['loopback-network', 'local-network-access', 'local-network']) {
+      try {
+        const s = (await navigator.permissions.query({ name })).state;
+        if (s === 'granted') return 'granted';
+        if (s === 'denied' || state === 'unsupported') state = s;
+      } catch {}
     }
-    return 'unsupported';            // older browser: no permission needed
+    return state;
   }
+  const HELPER_FLAG = 'crywall.helper';        // this browser connected to the PC helper before
+  const helperRemembered = () => { try { return localStorage.getItem(HELPER_FLAG) === '1'; } catch { return false; } };
   async function detectHelper(interactive = false) {
     if (!IS_REMOTE || IS_PHONE) return false;
     const state = await lnaState();
-    if (!interactive && state !== 'granted' && state !== 'unsupported') return false;
+    if (!interactive && state === 'denied') return false;
+    if (!interactive && state !== 'granted' && state !== 'unsupported' && !helperRemembered()) return false;
     try {
       const ctl = new AbortController();
-      if (!interactive) setTimeout(() => ctl.abort(), 1500);      // interactive: wait for the user's answer
+      if (!interactive) setTimeout(() => ctl.abort(), 4000);      // interactive: wait for the user's answer
       const r = await fetch(HELPER_URL + '/api/status', { signal: ctl.signal, targetAddressSpace: 'loopback' });
       if (!r.ok) return false;
       API = HELPER_URL; ONLINE = false; PHONE_MODE = false;
+      try { localStorage.setItem(HELPER_FLAG, '1'); } catch {}
       return true;
     } catch { return false; }       // helper not running / permission denied: stay in download mode
   }
@@ -492,8 +518,15 @@
   }
   // search words -> categories (the online catalog has no free-text search)
   const SEARCH_WORDS = {
-    doga: 'doğa doga nature orman forest ağaç agac tree çiçek cicek flower göl gol lake şelale selale waterfall yeşil yesil green nehir river',
-    manzara: 'manzara landscape dağ dag mountain gökyüzü gokyuzu sky deniz sea okyanus ocean sahil beach plaj gün batımı sunset bulut cloud',
+    doga: 'doğa doga nature ağaç agac tree çiçek cicek flower göl gol lake şelale selale waterfall yeşil yesil green nehir river',
+    dag: 'dağ dag dağlar mountain mountains zirve kar snow tepe',
+    deniz: 'deniz sea okyanus ocean sahil beach plaj dalga kıyı kiyi',
+    orman: 'orman forest ağaçlar agaclar woods',
+    karakter: 'karakter character kız kiz kızlar girl girls anime kızı',
+    savasci: 'savaşçı savasci warrior oyun karakteri game character asker soldier',
+    sovalye: 'şövalye sovalye knight zırh zirh armor',
+    samuray: 'samuray samurai ninja katana',
+    manzara: 'manzara landscape gökyüzü gokyuzu sky gün batımı sunset bulut cloud',
     anime: 'anime çizim cizim manga',
     japonya: 'japon japan japonya tokyo kiraz sakura tapınak tapinak torii kyoto',
     uzay: 'uzay space galaksi galaxy yıldız yildiz star gezegen planet ay moon nebula astronot',
@@ -524,10 +557,10 @@
   }
   // forHero: pictures that fill the hero — tall ones on phones, wide ones on computers
   async function staticMix(n = 6, forHero = false) {
-    const pick = shuffle(CATS.filter((c) => c.key !== 'kesfet')).slice(0, 4);
+    const pick = shuffle(mixPool()).slice(0, 4);
     const lists = await Promise.all(pick.map(getCat));
     const out = [];
-    lists.forEach((l) => shuffle(l.filter((it) => !mix.seen.has(it.id) && (forHero ? (IS_PHONE ? it.ratio < 0.8 && it.h >= 1920 : it.ratio >= 1.5 && it.w >= 1920) : passFilters(it)))).slice(0, n)
+    lists.forEach((l, i) => shuffle(l.filter((it) => !mix.seen.has(it.id) && (forHero ? (IS_PHONE ? it.ratio < 0.8 && it.h >= 1920 : it.ratio >= 1.5 && it.w >= 1920) : passFilters(it)))).slice(0, RARE_CATS.has(pick[i].key) ? 2 : n)
       .forEach((it) => { mix.seen.add(it.id); out.push(it); }));
     return shuffle(out);
   }
@@ -538,7 +571,7 @@
   async function loadMix() {
     if (ONLINE) { if (S.page === 1) mix.seen = new Set(); const out = await staticMix(); if (!out.length) S.done = true; return out; }
     if (S.page === 1) { mix.pages = {}; mix.seen = new Set(); }
-    const pool = CATS.filter((c) => c.key !== 'kesfet').sort(() => Math.random() - 0.5).slice(0, 4);
+    const pool = shuffle(mixPool()).slice(0, 4);
     const res = await Promise.all(pool.map((c) => {
       const info = mix.pages[c.key] || (mix.pages[c.key] = { used: [], last: 6 });
       const free = []; for (let i = 1; i <= Math.min(info.last, 8); i++) if (!info.used.includes(i)) free.push(i);
@@ -903,7 +936,7 @@
   const heroFeed = { pages: {}, seen: new Set() };
   async function heroBatch() {
     if (ONLINE) return staticMix(5, true);
-    const cats = CATS.filter((c) => c.key !== 'kesfet').sort(() => Math.random() - 0.5).slice(0, 4);
+    const cats = shuffle(mixPool()).slice(0, 4);
     const res = await Promise.all(cats.map((c) => {
       const info = heroFeed.pages[c.key] || (heroFeed.pages[c.key] = { used: [], last: 8 });
       const free = []; for (let i = 1; i <= Math.min(info.last, 10); i++) if (!info.used.includes(i)) free.push(i);

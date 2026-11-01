@@ -24,20 +24,28 @@ function Save-Json([string]$path, $obj) {
     [IO.File]::WriteAllText($path, $json, $Utf8)
 }
 
-# Same categories as public/app.js (Keşfet is mixed from these on the site)
+# Same categories as public/app.js (Keşfet is mixed from these on the site).
+# "+tag" = the wallpaper MUST carry that tag, so "Dağ" only shows mountains (plain words
+# matched far too loosely).
 $Cats = @(
-    @{ key = 'doga'; q = 'nature'; c = '100' }, @{ key = 'manzara'; q = 'landscape'; c = '100' }, @{ key = 'anime'; q = 'sky'; c = '010' },
-    @{ key = 'japonya'; q = 'Japan'; c = '100' }, @{ key = 'uzay'; q = 'space'; c = '100' }, @{ key = 'siberpunk'; q = 'cyberpunk'; c = '100' },
-    @{ key = 'fantastik'; q = 'fantasy art'; c = '100' }, @{ key = 'dijital'; q = 'digital art'; c = '100' }, @{ key = 'araba'; q = 'cars'; c = '100' },
-    @{ key = 'sehir'; q = 'city'; c = '100' }, @{ key = 'hayvan'; q = 'animals'; c = '100' }, @{ key = 'minimal'; q = 'minimalism'; c = '100' },
-    @{ key = 'soyut'; q = 'abstract'; c = '100' }, @{ key = 'karanlik'; q = 'dark'; c = '100' }
+    @{ key = 'doga'; q = '+nature'; c = '100' }, @{ key = 'manzara'; q = '+landscape'; c = '100' },
+    @{ key = 'dag'; q = '+mountains'; c = '100' }, @{ key = 'deniz'; q = '+sea'; c = '100' }, @{ key = 'orman'; q = '+forest'; c = '100' },
+    @{ key = 'anime'; q = '+landscape'; c = '010' }, @{ key = 'karakter'; q = $CharacterQuery; c = '010' },
+    @{ key = 'savasci'; q = '+warrior'; c = '100' }, @{ key = 'sovalye'; q = '+knight'; c = '100' }, @{ key = 'samuray'; q = '+samurai'; c = '100' },
+    @{ key = 'japonya'; q = '+Japan'; c = '100' }, @{ key = 'uzay'; q = '+space'; c = '100' }, @{ key = 'siberpunk'; q = '+cyberpunk'; c = '100' },
+    @{ key = 'fantastik'; q = '+"fantasy art"'; c = '100' }, @{ key = 'dijital'; q = '+"digital art"'; c = '100' }, @{ key = 'araba'; q = '+cars'; c = '100' },
+    @{ key = 'sehir'; q = '+city'; c = '100' }, @{ key = 'hayvan'; q = '+animals'; c = '100' }, @{ key = 'minimal'; q = '+minimalism'; c = '100' },
+    @{ key = 'soyut'; q = '+abstract'; c = '100' }, @{ key = 'karanlik'; q = '+dark'; c = '100' }
 )
 $AnimeExtra = ' -"Makoto Shinkai" -"Studio Ghibli" -"Kimi no Na Wa" -"Genshin Impact" -"Honkai: Star Rail" -"Hatsune Miku"'
 
 function Get-Wallhaven($cat, [string]$ratios, [int]$page, [string]$range) {
-    $q = ($cat.q + $WhExclude + $(if ($cat.c -eq '010') { $AnimeExtra } else { '' })).Trim()
-    $url = 'https://wallhaven.cc/api/v1/search?purity=100&sorting=toplist&atleast=1920x1080' +
-        "&topRange=$range&categories=$($cat.c)&ratios=$ratios&page=$page&q=" + [uri]::EscapeDataString($q)
+    $q = ($cat.q + (Get-WhFilter $cat.q) + $(if ($cat.c -eq '010') { $AnimeExtra } else { '' })).Trim()
+    # 'all' = best of all time. Wallhaven has no topRange=all (it silently falls back to 1 month),
+    # so sort by favourites instead.
+    $sort = if ($range -eq 'all') { 'sorting=favorites' } else { "sorting=toplist&topRange=$range" }
+    $url = "https://wallhaven.cc/api/v1/search?purity=100&$sort&atleast=1920x1080" +
+        "&categories=$($cat.c)&ratios=$ratios&page=$page&q=" + [uri]::EscapeDataString($q)
     for ($try = 1; $try -le 4; $try++) {
         try {
             Start-Sleep -Milliseconds 1500          # Wallhaven allows 45 requests / minute

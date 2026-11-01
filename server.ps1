@@ -271,7 +271,7 @@ while ($listener.IsListening) {
             $cat = if ($req.QueryString['categories'] -eq '010') { '010' } else { '100' }   # no 'people' (celebrities)
             $qs += "categories=$cat"
             $extra = if ($cat -eq '010') { ' -"Makoto Shinkai" -"Studio Ghibli" -"Kimi no Na Wa" -"Genshin Impact" -"Honkai: Star Rail" -"Hatsune Miku"' } else { '' }
-            $qs += 'q=' + [uri]::EscapeDataString(($userQ + $WhExclude + $extra).Trim())
+            $qs += 'q=' + [uri]::EscapeDataString(($userQ + (Get-WhFilter $userQ) + $extra).Trim())
             $qs += 'purity=100'   # safe-for-work only
             Send-Json $ctx (Get-Cached ("https://wallhaven.cc/api/v1/search?" + ($qs -join '&')))
         }
