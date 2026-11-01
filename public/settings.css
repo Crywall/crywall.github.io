@@ -173,3 +173,18 @@ body { font-feature-settings: "cv11", "ss01"; }
 .more { display: flex; justify-content: center; padding: 6px 0 34px; }
 .more__btn { padding: 13px 30px; border-radius: 999px; font-size: 14.5px; border-color: rgb(var(--accent-rgb) / .45); }
 .more__btn:hover { background: rgb(var(--accent-rgb) / .12); border-color: var(--accent); }
+
+/* "back to the wallpaper" after jumping to a tag or colour */
+.backbtn { margin-right: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgb(var(--accent-rgb) / .5); background: rgb(var(--accent-rgb) / .12); color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap; align-self: center; }
+.backbtn:hover { background: rgb(var(--accent-rgb) / .22); }
+
+/* hero second line: same font + weight as the first line, theme colours flowing softly across it */
+.hero2__title em { font-weight: inherit !important; letter-spacing: inherit !important;
+  background-image: linear-gradient(90deg, var(--accent) 0%, #ffffff 35%, var(--accent) 60%, var(--accent2) 85%, var(--accent) 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  animation: heroflow 10s linear infinite !important; }
+@keyframes heroflow { to { background-position: -250% 0; } }
+.calm .hero2__title em { animation: none !important; }
+/* strips: nothing grows on hover, so pills never overlap */
+.mqi, .mq:hover .mqi { transform: none !important; }
+.mq .mqi:hover { transform: translateY(-3px) !important; }

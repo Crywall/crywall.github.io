@@ -73,7 +73,7 @@
     'Hesap': 'Account', 'Veriler': 'Data', 'Favorileri temizle': 'Clear favorites', 'Ayarları sıfırla': 'Reset settings', 'Hakkında': 'About',
     'Sürüm': 'Version', 'Gizlilik': 'Privacy', 'Telif': 'Copyright', 'Giriş yapmadın': 'Not signed in',
     'Giriş yaparsan favorilerin her cihazda seninle olur.': 'Sign in to keep your favorites on every device.',
-    'Daha fazla göster': 'Show more', 'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
+    'Daha fazla göster': 'Show more', '← Duvar kağıdına dön': '← Back to wallpaper', 'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
     'VexWalls sadece favorilerini ve tercihlerini senin cihazında saklar.': 'Only your favorites and preferences are stored, on your own device.',
     'Bir manzara ara… dağ, okyanus, gece': 'Search a view… mountains, ocean, night',
     'Ara: dağ, okyanus, gece…': 'Search: mountains, ocean, night…',

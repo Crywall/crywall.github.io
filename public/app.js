@@ -405,6 +405,7 @@
     if (!viewer.hidden) { closeViewer(true); return; }
     const st = e.state; if (!st || st.viewer) return;
     if (sameNav(st, navState())) return;       // same view: nothing to reload
+    if (backTo && sameNav(backTo.nav, st)) { history.replaceState(st, ''); goBackToWallpaper(); return; }   // browser Back after a tag/colour jump
     restoring = true;
     S.cat = CATS.find((c) => c.key === st.cat) || CATS[0]; S.q = st.q || ''; S.colors = st.colors || '';
     S.title = st.title || S.cat.name; S.liveCat = st.live || S.liveCat;
@@ -414,6 +415,7 @@
 
   function reset(scroll) {
     remember();
+    setTimeout(() => window.__cwUpdateBack && window.__cwUpdateBack(), 0);
     S.token++; S.page = 1; S.done = false; S.seed = ''; S.items = []; S.loading = false;
     grid.innerHTML = ''; $('#empty').hidden = true; $('#gridCount').textContent = '';
     grid.classList.toggle('is-portrait', S.mode === 'static' && S.ratio === 'portrait');
@@ -451,7 +453,9 @@
         if (S.page === 1) $('#gridCount').textContent = 'Her seferinde farklı · tüm kategorilerden karışık';
       } else if (S.mode === 'static') {
         const p = new URLSearchParams({ q: S.q || S.cat.q, categories: S.q ? '110' : S.cat.c, sorting: S.sort, atleast: S.res, page: S.page });
-        if (S.sort === 'toplist' && S.range) p.set('topRange', S.range);
+        const tagSearch = S.title.startsWith('#');            // tag pages: best of all time, so they're never empty
+        if (tagSearch) p.set('sorting', 'favorites');
+        else if (S.sort === 'toplist' && S.range) p.set('topRange', S.range);
         if (S.ratio) p.set('ratios', S.ratio);
         if (S.colors) p.set('colors', S.colors);
         if (S.seed) p.set('seed', S.seed);
@@ -726,7 +730,7 @@
     $('#vColorBox').hidden = !(cur.colors || []).length;
     (cur.colors || []).forEach((c) => {
       const b = el('button'); b.style.background = c; b.title = 'Bu renkteki diğer duvar kağıtlarını göster';
-      b.onclick = () => { closeViewer(); S.colors = c.slice(1); S.q = ''; S.title = 'Renk ' + c; switchMode('static', false); renderCats(); reset('force'); };
+      b.onclick = () => { rememberViewer(); closeViewer(); S.colors = c.slice(1); S.q = ''; S.title = 'Renk ' + c; switchMode('static', false); renderCats(); reset('force'); };
       sw.append(b);
     });
     renderActions(cur);
@@ -814,12 +818,25 @@
       const box = $('#vTags');
       (r.data.tags || []).slice(0, 14).forEach((t) => {
         const b = el('button', '', '#' + esc(t.name));
-        b.onclick = () => { closeViewer(); S.q = 'id:' + t.id; S.colors = ''; S.title = '#' + t.name; switchMode('static', false); renderCats(); reset('force'); };
+        // search by the tag NAME, best of all time (searching by tag id never matched with our filters)
+        b.onclick = () => { rememberViewer(); closeViewer(); S.q = '+"' + t.name.replace(/"/g, '') + '"'; S.colors = ''; S.title = '#' + t.name; switchMode('static', false); renderCats(); reset('force'); };
         box.append(b);
       });
     } catch {}
   }
 
+  // Coming back to a wallpaper after jumping to one of its tags / colours
+  let backTo = null;
+  function rememberViewer() { if (cur) backTo = { it: cur, nav: navState() }; }
+  function updateBack() { const b = $('#backBtn'); if (b) b.hidden = !backTo || sameNav(backTo.nav, navState()); }
+  window.__cwUpdateBack = updateBack;
+  function goBackToWallpaper() {
+    if (!backTo) return;
+    const { it, nav } = backTo; backTo = null;
+    S.cat = CATS.find((c) => c.key === nav.cat) || CATS[0]; S.q = nav.q || ''; S.colors = nav.colors || ''; S.title = nav.title || S.cat.name; S.liveCat = nav.live || S.liveCat;
+    switchMode(nav.mode || 'static', false); renderCats(); reset('force');
+    setTimeout(() => openViewer(0, [it]), 250);
+  }
   // fromHistory: closed by the Back button (history already moved back)
   function closeViewer(fromHistory = false) {
     if (viewer.hidden) return;
@@ -896,6 +913,7 @@
   $('#contactMail').target = '_blank';
   if (!CONTACT_EMAIL) $('#contactMail').textContent = 'GitHub üzerinden kaldırma talebi açarak bize';
   $('#moreBtn').onclick = () => { load(); updateMore(); };
+  $('#backBtn').onclick = goBackToWallpaper;
   $('#openFolder').onclick = () => api(API + '/api/open-folder').catch((e) => toast('Klasör açılamadı', serverHint(e), 'err'));
 
   // ---------- micro-interactions ----------
