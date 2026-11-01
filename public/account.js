@@ -15,7 +15,9 @@ import {
 
 const app = initializeApp({
   apiKey: 'AIzaSyCoMRK5s608JForIuO8Nkwz5qUhSK8BPMM',
-  authDomain: 'crywall-7fb79.firebaseapp.com',
+  // On the website the sign-in helper pages are served from our own domain (public/__/auth/*),
+  // so browsers that block cross-site storage (Edge tracking prevention, Safari) still work.
+  authDomain: location.hostname === 'vexwalls.github.io' ? 'vexwalls.github.io' : 'crywall-7fb79.firebaseapp.com',
   projectId: 'crywall-7fb79',
   storageBucket: 'crywall-7fb79.firebasestorage.app',
   messagingSenderId: '1005137554586',

@@ -109,7 +109,7 @@
       mq.addEventListener('wheel', (e) => {
         e.preventDefault();
         const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        row.x -= d * (e.deltaMode === 1 ? 32 : 1.1);
+        row.pend = (row.pend || 0) - d * (e.deltaMode === 1 ? 32 : 1.1);   // glide there smoothly (see frame)
       }, { passive: false });
       // drag to scrub
       mq.addEventListener('pointerdown', (e) => { row.drag = e.clientX; row.dragX = row.x; dragMoved = false; });
@@ -136,6 +136,7 @@
       const half = r.half;
       if (r.drag == null) {
         if (!r.hover) r.x += r.base * r.dir;   // slow steady drift; stops while the mouse is on the strip
+        if (r.pend) { const s = r.pend * 0.14; r.x += s; r.pend -= s; if (Math.abs(r.pend) < 0.3) r.pend = 0; }   // soft wheel glide
       }
       if (half) { while (r.x <= -half) r.x += half; while (r.x > 0) r.x -= half; }
       r.track.style.transform = `translate3d(${r.x}px,0,0)`;

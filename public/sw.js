@@ -1,7 +1,7 @@
 /* VexWalls service worker — makes the site installable as an app and keeps it
    working on a bad connection. Network first; the cached copy is only a fallback,
    so updates always show up. Pictures from other sites are not cached here. */
-const CACHE = 'crywall-v4';
+const CACHE = 'crywall-v5';
 const SHELL = ['./', 'index.html', 'styles.css', 'theme.css', 'app.js', 'fx.js', 'pwa.js', 'account.js', 'i18n.js', 'settings.js', 'settings.css', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
@@ -18,6 +18,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;   // other sites: browser handles it
   if (url.pathname.includes('/t/')) return;                               // big phone previews: normal browser cache
+  if (url.pathname.includes('/__/')) return;                              // sign-in helper pages: never cached
   e.respondWith(
     fetch(req, { cache: 'no-cache' }).then((res) => {   // always ask the server for the newest file
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
