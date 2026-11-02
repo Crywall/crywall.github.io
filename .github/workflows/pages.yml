@@ -25,15 +25,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # full history: the version number is the commit count
-      - name: Restore phone thumbnails made on earlier nights
+      - name: Restore thumbnails and the catalog made on earlier runs
         uses: actions/cache@v4
         with:
-          path: public/t
-          key: phone-thumbs-${{ github.run_id }}
-          restore-keys: phone-thumbs-
+          path: |
+            public/t
+            public/data
+          key: site-data-${{ github.run_id }}
+          restore-keys: |
+            site-data-
+            phone-thumbs-
+      # The full catalog rebuild takes 15+ minutes. Normal pushes reuse the last catalog
+      # (publishes in ~1-2 min); it is rebuilt every night, by hand, or when tools/ changed.
+      - name: Decide whether to rebuild the catalog
+        id: need
+        run: |
+          if [ "${{ github.event_name }}" != "push" ] || [ ! -f public/data/index.json ] || git diff --name-only ${{ github.event.before }} HEAD 2>/dev/null | grep -q '^tools/' || ! git cat-file -e ${{ github.event.before }} 2>/dev/null; then
+            echo "build=yes" >> "$GITHUB_OUTPUT"; echo "catalog: rebuild"
+          else
+            echo "build=no" >> "$GITHUB_OUTPUT"; echo "catalog: reuse last one"
+          fi
       - name: Make sure ffmpeg is installed (used to make phone thumbnails)
+        if: steps.need.outputs.build == 'yes'
         run: command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
       - name: Build wallpaper catalog
+        if: steps.need.outputs.build == 'yes'
         shell: pwsh
         run: ./tools/build-catalog.ps1
       - name: Write version (shown in the corner of the site)
