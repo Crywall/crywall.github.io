@@ -73,7 +73,7 @@
     'Hesap': 'Account', 'Veriler': 'Data', 'Favorileri temizle': 'Clear favorites', 'Ayarları sıfırla': 'Reset settings', 'Hakkında': 'About',
     'Sürüm': 'Version', 'Gizlilik': 'Privacy', 'Telif': 'Copyright', 'Giriş yapmadın': 'Not signed in',
     'Giriş yaparsan favorilerin her cihazda seninle olur.': 'Sign in to keep your favorites on every device.',
-    'Daha fazla göster': 'Show more', 'Otomatik değiştir': 'Auto change', 'Duvar kağıdını kendiliğinden değiştir': 'Change wallpaper automatically', 'Nereden': 'From', 'Kategori': 'Category', 'Ne sıklıkla': 'How often', 'Saatte bir': 'Hourly', '3 saatte bir': 'Every 3 hours', 'Günde bir': 'Daily', 'Şimdi değiştir': 'Change now', 'Kitaplığım': 'My library', 'Paylaş': 'Share', 'Benzerleri': 'Similar', '✓ Tam uyar': '✓ Perfect fit', 'Bağlantı kopyalandı': 'Link copied', 'Kitaplığım': 'My library', 'Son kullanılanlar': 'Recently used', 'Henüz bir şey kullanmadın': 'Nothing used yet', '← Duvar kağıdına dön': '← Back to wallpaper', 'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
+    'Daha fazla göster': 'Show more', 'Ekranının çözünürlüğüne ve oranına birebir uyar — bulanık ya da kırpık görünmez.': 'Matches your screen resolution and shape exactly — never blurry or cropped.', 'Otomatik değiştir': 'Auto change', 'Duvar kağıdını kendiliğinden değiştir': 'Change wallpaper automatically', 'Nereden': 'From', 'Kategori': 'Category', 'Ne sıklıkla': 'How often', 'Saatte bir': 'Hourly', '3 saatte bir': 'Every 3 hours', 'Günde bir': 'Daily', 'Şimdi değiştir': 'Change now', 'Kitaplığım': 'My library', 'Paylaş': 'Share', 'Benzerleri': 'Similar', '✓ Tam uyar': '✓ Perfect fit', 'Bağlantı kopyalandı': 'Link copied', 'Kitaplığım': 'My library', 'Son kullanılanlar': 'Recently used', 'Henüz bir şey kullanmadın': 'Nothing used yet', '← Duvar kağıdına dön': '← Back to wallpaper', 'Tema': 'Theme', 'Otomatik': 'Auto', 'Türkçe': 'Türkçe', 'English': 'English', 'Tüm favoriler silinsin mi?': 'Delete all favorites?', 'Favoriler temizlendi': 'Favorites cleared', 'Tüm ayarlar varsayılana dönsün mü?': 'Reset all settings to default?',
     'VexWalls sadece favorilerini ve tercihlerini senin cihazında saklar.': 'Only your favorites and preferences are stored, on your own device.',
     'Bir manzara ara… dağ, okyanus, gece': 'Search a view… mountains, ocean, night',
     'Ara: dağ, okyanus, gece…': 'Search: mountains, ocean, night…',
@@ -93,7 +93,7 @@
   window.T = T;
   if (lang === 'tr') return;
 
-  const ATTRS = ['placeholder', 'title', 'aria-label'];
+  const ATTRS = ['placeholder', 'title', 'aria-label', 'data-tip'];
   function translate(root) {
     if (root.nodeType === 3) { const v = T(root.nodeValue); if (v !== root.nodeValue) root.nodeValue = v; return; }
     if (root.nodeType !== 1 || root.closest?.('script,style')) return;

@@ -214,3 +214,11 @@ body { font-feature-settings: "cv11", "ss01"; }
 
 .st-rot.is-off { opacity: .45; pointer-events: none; }
 .st-note { margin: 6px 0 0; font-size: 12px; color: var(--dim); line-height: 1.45; }
+
+/* "✓ Tam uyar": hover / tap shows what it means */
+.card__tags .tagcat--fit { pointer-events: auto; cursor: help; position: relative; }
+.tagcat--fit::after { content: attr(data-tip); position: absolute; left: 0; top: calc(100% + 8px); z-index: 5; width: max-content; max-width: 230px; white-space: normal;
+  padding: 8px 10px; border-radius: 9px; background: rgba(8,10,14,.96); color: #e9eff6; border: 1px solid rgba(52,211,153,.45);
+  font-size: 12px; font-weight: 500; line-height: 1.4; box-shadow: 0 12px 30px -12px rgba(0,0,0,.8);
+  opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; }
+.tagcat--fit:hover::after, .tagcat--fit:focus::after { opacity: 1; transform: none; }

@@ -689,7 +689,7 @@
         <div class="card__ph" style="background:${esc(bg)}"></div>
         <img src="${esc(thumbOf(it))}" alt="Duvar kağıdı ${esc(it.res)}" loading="lazy" decoding="async">
         <div class="card__tags">
-          ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}${fitsScreen(it) ? '<span class="tagcat tagcat--fit" title="Ekranının çözünürlüğüne ve oranına birebir uyar">✓ Tam uyar</span>' : ''}
+          ${it.catName ? `<span class="tagcat">${esc(it.catName)}</span>` : ''}${it.w >= 3840 ? '<span class="tagcat tagcat--4k">4K</span>' : ''}${fitsScreen(it) ? '<span class="tagcat tagcat--fit" tabindex="0" data-tip="Ekranının çözünürlüğüne ve oranına birebir uyar — bulanık ya da kırpık görünmez.">✓ Tam uyar</span>' : ''}
           <div class="card__moods">${moodHtml(it)}</div>
         </div>
         <div class="card__overlay">
@@ -723,6 +723,7 @@
     img.onload = () => img.classList.add('is-loaded');
     img.onerror = () => { img.remove(); };
     c.addEventListener('click', (e) => {
+      if (e.target.closest('.tagcat--fit')) { e.stopPropagation(); return; }   // tapping the badge only shows its explanation
       if (e.target.closest('[data-fav]')) { e.stopPropagation(); return toggleFav(it); }
       if (e.target.closest('[data-quick]')) { e.stopPropagation(); if (PHONE_MODE) return it.kind === 'img' ? savePhone(it) : window.open(videoUrl(it), '_blank'); return it.kind === 'img' ? applyImg(it, 'desktop') : applyLive(it); }
       openViewer(idx);
