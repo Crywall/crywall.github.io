@@ -862,6 +862,7 @@
             <b>Tek tıkla masaüstüne uygula</b>
             <span>VexWalls yardımcısı bu bilgisayarda çalışıyorsa bağlan; duvar kağıdı doğrudan uygulanır.</span>
             <button class="btn btn--primary" data-act="connect">${ICON.monitor}Bu bilgisayara bağlan</button>
+            <a class="connect__dl" href="https://github.com/VexWalls/vexwalls.github.io/releases/latest/download/VexWalls.exe">Yardımcı yüklü değil mi? <b>VexWalls uygulamasını indir</b> (Windows)</a>
           </div>`);
       }
       a.onclick = (e) => {

@@ -8,3 +8,5 @@ GUNLUK.md
 public/_*.html
 # phone thumbnails, made nightly by GitHub Actions
 public/t/
+# built app (published as a GitHub release, not committed)
+app/dist/

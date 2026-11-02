@@ -222,3 +222,8 @@ body { font-feature-settings: "cv11", "ss01"; }
   font-size: 12px; font-weight: 500; line-height: 1.4; box-shadow: 0 12px 30px -12px rgba(0,0,0,.8);
   opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; }
 .tagcat--fit:hover::after, .tagcat--fit:focus::after { opacity: 1; transform: none; }
+
+.connect__dl { font-size: 12.5px; color: var(--muted); text-decoration: none; text-align: center; }
+.connect__dl b { color: var(--accent); }
+.connect__dl:hover b { text-decoration: underline; }
+@media (pointer: coarse) { .dl-app, .connect__dl { display: none !important; } }
