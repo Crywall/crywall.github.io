@@ -70,7 +70,8 @@
         <span>VexWalls ${ver ? 'v' + ver.v : ''}${ver?.date ? ' · ' + ver.date : ''}</span>
         <button class="st-link" data-act="privacy">${T('Gizlilik')}</button>
         <button class="st-link" data-act="copyright">${T('Telif')}</button>
-      </div>`;
+      </div>
+      <p style="margin:14px 0 0;font-size:11px;opacity:.45;text-align:center">Melih Çizmelioğlu</p>`;
     renderRotate();
   }
 
